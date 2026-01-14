@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(curl:*)",
+      "Bash(bash)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash([ -s \"$NVM_DIR/nvm.sh\" ])",
+      "Bash(. \"$NVM_DIR/nvm.sh\")",
+      "Bash(nvm install:*)",
+      "Bash(npm create tauri-app@latest . -- --name tcp-sender --template react-ts --manager npm --yes)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(sh -s -- -y)",
+      "Bash(source \"$HOME/.cargo/env\")",
+      "Bash(rustc:*)",
+      "Bash(cargo --version:*)",
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(node test-server.js:*)",
+      "Bash(node test-server.cjs:*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}
