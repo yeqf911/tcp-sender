@@ -80,7 +80,6 @@ export default function ResponseViewer({ data, height = '100%' }: ResponseViewer
           style={{
             flex: 1,
             fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
-            fontSize: 16,
             background: '#1e1e1e',
             color: '#cccccc',
             resize: 'none',
@@ -108,7 +107,6 @@ export default function ResponseViewer({ data, height = '100%' }: ResponseViewer
           style={{
             flex: 1,
             fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
-            fontSize: 16,
             background: '#1e1e1e',
             color: '#cccccc',
             resize: 'none',

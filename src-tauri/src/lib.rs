@@ -38,6 +38,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::get_app_version,
             commands::create_connection,
             commands::connect_to_server,
             commands::disconnect_from_server,

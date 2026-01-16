@@ -1,6 +1,8 @@
 import { Layout, Typography, Space, Tag, Select } from 'antd';
 import { Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useZoom, ZOOM_LEVELS } from '../../contexts/ZoomContext';
+import { versionService } from '../../services/versionService';
 import Sidebar from './Sidebar';
 import Connections from '../../pages/Connections';
 import Protocols from '../../pages/Protocols';
@@ -13,6 +15,13 @@ const { Title } = Typography;
 
 export default function MainLayout() {
   const { zoom, setZoom } = useZoom();
+  const [appVersion, setAppVersion] = useState('1.0.0');
+
+  useEffect(() => {
+    versionService.getAppVersion()
+      .then(setAppVersion)
+      .catch(() => setAppVersion('1.0.0'));
+  }, []);
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#1e1e1e' }}>
@@ -66,7 +75,7 @@ export default function MainLayout() {
                   color: '#ff6c37',
                 }}
               >
-                v1.2.0
+                v{appVersion}
               </Tag>
             </Space>
             <Space>

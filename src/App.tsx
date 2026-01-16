@@ -24,7 +24,7 @@ function AppContent() {
           colorBgContainer: '#1e1e1e',
           colorBgElevated: '#252526',
           borderRadius: 2,
-          fontSize: 16,
+          fontSize: 14,
         },
         components: {
           Layout: {

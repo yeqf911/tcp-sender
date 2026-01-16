@@ -502,7 +502,7 @@ export default function Messages() {
             }}
           >
             <Space>
-              <span style={{ color: '#cccccc', fontSize: 16, fontWeight: 500 }}>Request</span>
+              <span style={{ color: '#cccccc', fontWeight: 500 }}>Request</span>
               <Select
                 value={currentTab.requestMode}
                 onChange={(value) => updateTab(activeTab, { requestMode: value })}
@@ -516,7 +516,7 @@ export default function Messages() {
               />
               {currentTab.requestMode === 'protocol' && (
                 <>
-                  <span style={{ color: '#858585', fontSize: 16 }}>|</span>
+                  <span style={{ color: '#858585' }}>|</span>
                   <Select
                     value={currentTab.selectedProtocolPreset}
                     onChange={handleProtocolPresetChange}
@@ -561,7 +561,6 @@ export default function Messages() {
                 style={{
                   height: '100%',
                   fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
-                  fontSize: 16,
                   background: '#1e1e1e',
                   color: '#cccccc',
                   resize: 'none',
@@ -584,8 +583,8 @@ export default function Messages() {
             }}
           >
             <Space>
-              <span style={{ color: '#cccccc', fontSize: 16, fontWeight: 500 }}>Response</span>
-              <span style={{ color: '#858585', fontSize: 16 }}>{currentTab.responseTime} ms</span>
+              <span style={{ color: '#cccccc', fontWeight: 500 }}>Response</span>
+              <span style={{ color: '#858585' }}>{currentTab.responseTime} ms</span>
             </Space>
             <Space>
               <Button size="small">Copy</Button>
