@@ -1,10 +1,9 @@
 import { Menu, Tooltip } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  HomeOutlined,
+  SendOutlined,
   ApiOutlined,
   FileTextOutlined,
-  SendOutlined,
   ExperimentOutlined,
   HistoryOutlined,
 } from '@ant-design/icons';
@@ -17,8 +16,8 @@ export default function Sidebar() {
     {
       key: '/',
       icon: (
-        <Tooltip title="Home" placement="right">
-          <HomeOutlined style={{ fontSize: 20 }} />
+        <Tooltip title="Messages" placement="right">
+          <SendOutlined style={{ fontSize: 20 }} />
         </Tooltip>
       ),
       label: null,
@@ -37,15 +36,6 @@ export default function Sidebar() {
       icon: (
         <Tooltip title="Protocols" placement="right">
           <FileTextOutlined style={{ fontSize: 20 }} />
-        </Tooltip>
-      ),
-      label: null,
-    },
-    {
-      key: '/messages',
-      icon: (
-        <Tooltip title="Messages" placement="right">
-          <SendOutlined style={{ fontSize: 20 }} />
         </Tooltip>
       ),
       label: null,

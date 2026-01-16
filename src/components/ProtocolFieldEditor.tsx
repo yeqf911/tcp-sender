@@ -52,12 +52,6 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     return formatted.replace(/\s/g, '').toUpperCase();
   };
 
-  // Check if value is hex
-  const isHexValue = (value: string): boolean => {
-    const clean = value.replace(/\s/g, '');
-    return /^[0-9A-Fa-f]+$/.test(clean) && clean.length % 2 === 0;
-  };
-
   const addField = () => {
     const newField: ProtocolField = {
       id: `field_${Date.now()}`,
@@ -103,7 +97,7 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     }
   };
 
-  const handleValueBlur = (id: string, field: ProtocolField) => {
+  const handleValueBlur = (id: string, _field: ProtocolField) => {
     // Clear editing state on blur
     setEditingFields(prev => {
       const newEditing = { ...prev };
@@ -159,7 +153,14 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
           disabled={record.isVariable}
           size="small"
           className="protocol-field-input"
-          style={{ width: '100%' }}
+          style={{
+            width: '100%',
+            ...(record.isVariable && {
+              color: '#555555',
+              cursor: 'not-allowed',
+              opacity: 0.6,
+            }),
+          }}
         />
       ),
     },

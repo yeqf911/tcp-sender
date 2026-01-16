@@ -14,7 +14,7 @@ function hexToText(hex: string): string {
 
   // Check if it's valid hex
   if (!/^[0-9A-Fa-f]*$/.test(cleanHex)) {
-    return data; // Not hex, return as-is
+    return hex; // Not hex, return as-is
   }
 
   try {
@@ -30,7 +30,7 @@ function hexToText(hex: string): string {
     const decoder = new TextDecoder('utf-8', { fatal: false });
     return decoder.decode(new Uint8Array(bytes));
   } catch {
-    return data; // Failed to decode, return as-is
+    return hex; // Failed to decode, return as-is
   }
 }
 

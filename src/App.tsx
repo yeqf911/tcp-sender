@@ -31,19 +31,16 @@ function App() {
           Input: {
             colorBgContainer: '#1e1e1e',
             colorBorder: '#1e1e1e',
-            colorBorderHover: '#1e1e1e',
             borderRadius: 2,
           },
           InputNumber: {
             colorBgContainer: '#1e1e1e',
             colorBorder: '#1e1e1e',
-            colorBorderHover: '#1e1e1e',
             borderRadius: 2,
           },
           Select: {
             colorBgContainer: '#1e1e1e',
             colorBorder: '#1e1e1e',
-            colorBorderHover: '#1e1e1e',
             borderRadius: 2,
             optionSelectedBg: '#37373d',
           },

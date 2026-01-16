@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Select, Space, Input, Tabs, message as antMessage } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { connectionService } from '../services/connectionService';
 import { messageService } from '../services/messageService';
+import { protocolService, Protocol as SavedProtocol } from '../services/protocolService';
 import ProtocolFieldEditor from '../components/ProtocolFieldEditor';
 import ResponseViewer from '../components/ResponseViewer';
 import type { ProtocolField } from '../types/protocol-simple';
-import { protocolPresets, applyProtocolPreset } from '../utils/protocolPresets';
 
 const { TextArea } = Input;
 
@@ -43,6 +43,14 @@ export default function Messages() {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [savedProtocols, setSavedProtocols] = useState<SavedProtocol[]>([]);
+
+  // Load saved protocols on mount
+  useEffect(() => {
+    protocolService.listProtocols()
+      .then(setSavedProtocols)
+      .catch(err => console.error('Failed to load protocols:', err));
+  }, []);
 
   const connectionId = `conn_${activeTab}`;
   const currentTab = tabs.find(tab => tab.key === activeTab)!;
@@ -51,14 +59,30 @@ export default function Messages() {
     setTabs(tabs.map(tab => (tab.key === key ? { ...tab, ...updates } : tab)));
   };
 
-  const handleProtocolPresetChange = (presetId: string) => {
-    const preset = protocolPresets.find(p => p.id === presetId);
-    if (preset) {
-      const fields = applyProtocolPreset(preset);
+  const handleProtocolPresetChange = async (protocolId: string) => {
+    if (!protocolId) {
       updateTab(activeTab, {
-        selectedProtocolPreset: presetId,
-        protocolFields: fields,
+        selectedProtocolPreset: undefined,
+        protocolFields: [],
       });
+      return;
+    }
+
+    try {
+      const protocol = await protocolService.getProtocol(protocolId);
+      if (protocol) {
+        // Convert saved protocol fields to tab fields with new IDs
+        const fields = protocol.fields.map((field, index) => ({
+          ...field,
+          id: `field_${Date.now()}_${index}`,
+        }));
+        updateTab(activeTab, {
+          selectedProtocolPreset: protocolId,
+          protocolFields: fields,
+        });
+      }
+    } catch (error) {
+      antMessage.error('Failed to load protocol: ' + error);
     }
   };
 
@@ -381,11 +405,11 @@ export default function Messages() {
                   <Select
                     value={currentTab.selectedProtocolPreset}
                     onChange={handleProtocolPresetChange}
-                    placeholder="Select protocol preset"
-                    style={{ width: 150 }}
-                    options={protocolPresets.map(preset => ({
-                      value: preset.id,
-                      label: preset.name,
+                    placeholder="Select saved protocol"
+                    style={{ width: 180 }}
+                    options={savedProtocols.map(protocol => ({
+                      value: protocol.id,
+                      label: protocol.name,
                     }))}
                     size="small"
                     allowClear

@@ -1,5 +1,3 @@
-pub mod schema;
-pub mod connection;
-pub mod protocol;
-pub mod history;
-pub mod test;
+pub mod db;
+
+pub use db::{Database, DbPool};

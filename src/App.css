@@ -456,6 +456,21 @@ textarea.ant-input[readonly]:focus {
   border-color: #1e1e1e !important;
 }
 
+/* Fix white border flash when adding new rows */
+.ant-table-tbody > tr.ant-table-row {
+  border-color: #2d2d30 !important;
+}
+
+.ant-table-tbody > tr.ant-table-row > td {
+  border-color: #2d2d30 !important;
+}
+
+/* Fix for table cell borders during animation */
+.ant-table-cell-fix-left,
+.ant-table-cell-fix-right {
+  border-color: #2d2d30 !important;
+}
+
 .ant-table-tbody > tr:hover .ant-checkbox-inner {
   background-color: #1e1e1e !important;
   border-color: #1e1e1e !important;
@@ -464,4 +479,24 @@ textarea.ant-input[readonly]:focus {
 .ant-table-tbody > tr:hover .ant-checkbox-checked .ant-checkbox-inner {
   background-color: #ff6c37 !important;
   border-color: #ff6c37 !important;
+}
+
+/* Disabled InputNumber - gray text for variable fields */
+.ant-input-number-disabled {
+  opacity: 0.6 !important;
+}
+
+.ant-input-number-disabled .ant-input-number-input {
+  color: #555555 !important;
+  cursor: not-allowed !important;
+}
+
+/* Message popup - dark theme */
+.ant-message-notice-content {
+  background: #2d2d30 !important;
+  color: #555555 !important;
+}
+
+.ant-message-notice-content .anticon {
+  color: #555555 !important;
 }

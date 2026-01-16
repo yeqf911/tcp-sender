@@ -1,7 +1,6 @@
 import { Layout, Typography, Space, Tag } from 'antd';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import Home from '../../pages/Home';
 import Connections from '../../pages/Connections';
 import Protocols from '../../pages/Protocols';
 import Messages from '../../pages/Messages';
@@ -76,7 +75,7 @@ export default function MainLayout() {
             }}
           >
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Messages />} />
               <Route path="/connections" element={<Connections />} />
               <Route path="/protocols" element={<Protocols />} />
               <Route path="/messages" element={<Messages />} />
