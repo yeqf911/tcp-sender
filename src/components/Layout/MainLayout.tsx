@@ -1,5 +1,6 @@
-import { Layout, Typography, Space, Tag } from 'antd';
+import { Layout, Typography, Space, Tag, Select } from 'antd';
 import { Routes, Route } from 'react-router-dom';
+import { useZoom, ZOOM_LEVELS } from '../../contexts/ZoomContext';
 import Sidebar from './Sidebar';
 import Connections from '../../pages/Connections';
 import Protocols from '../../pages/Protocols';
@@ -11,6 +12,8 @@ const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
 export default function MainLayout() {
+  const { zoom, setZoom } = useZoom();
+
   return (
     <Layout style={{ minHeight: '100vh', background: '#1e1e1e' }}>
       <Layout style={{ flexDirection: 'row' }}>
@@ -65,6 +68,19 @@ export default function MainLayout() {
               >
                 v1.2.0
               </Tag>
+            </Space>
+            <Space>
+              <span style={{ color: '#858585', fontSize: 14 }}>Zoom:</span>
+              <Select
+                value={zoom}
+                onChange={setZoom}
+                style={{ width: 80 }}
+                size="small"
+                options={ZOOM_LEVELS.map(level => ({
+                  label: `${level}%`,
+                  value: level,
+                }))}
+              />
             </Space>
           </Header>
           <Content

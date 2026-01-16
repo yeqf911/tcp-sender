@@ -1,10 +1,19 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ConfigProvider, theme } from 'antd';
 import enUS from 'antd/locale/en_US';
+import { ZoomProvider, useZoom } from './contexts/ZoomContext';
 import MainLayout from './components/Layout/MainLayout';
 import './App.css';
 
-function App() {
+function AppContent() {
+  const { zoom } = useZoom();
+
+  useEffect(() => {
+    // Apply zoom to body element
+    document.body.style.zoom = `${zoom}%`;
+  }, [zoom]);
+
   return (
     <ConfigProvider
       locale={enUS}
@@ -61,6 +70,14 @@ function App() {
         <MainLayout />
       </Router>
     </ConfigProvider>
+  );
+}
+
+function App() {
+  return (
+    <ZoomProvider>
+      <AppContent />
+    </ZoomProvider>
   );
 }
 
