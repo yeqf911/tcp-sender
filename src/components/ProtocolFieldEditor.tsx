@@ -10,27 +10,6 @@ interface ProtocolFieldEditorProps {
 
 export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
   const [editingFields, setEditingFields] = useState<Record<string, string>>({});
-  const [tableHeight, setTableHeight] = useState<number>(400);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const updateHeight = () => {
-      const container = containerRef.current;
-      if (container) {
-        const height = container.clientHeight;
-        setTableHeight(Math.max(100, height - 80));
-      }
-    };
-
-    updateHeight();
-
-    const resizeObserver = new ResizeObserver(updateHeight);
-    resizeObserver.observe(containerRef.current);
-
-    return () => resizeObserver.disconnect();
-  }, []);
 
   // Format hex value with spaces between bytes
   const formatHexValue = (value: string, maxLength?: number): string => {
@@ -90,6 +69,23 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     );
   };
 
+  // 计算值的实际字节长度
+  const calculateByteLength = (value: string, valueType: 'text' | 'hex', isVariable: boolean): number => {
+    if (!value) return 0;
+
+    if (isVariable) {
+      if (valueType === 'text') {
+        // Text 类型：直接返回字符数（UTF-8 字节数）
+        return new TextEncoder().encode(value).length;
+      } else {
+        // Hex 类型：返回 hex 字符串长度 / 2
+        const cleanHex = value.replace(/\s/g, '');
+        return Math.floor(cleanHex.length / 2);
+      }
+    }
+    return 0;
+  };
+
   const handleValueChange = (id: string, inputValue: string, field: ProtocolField) => {
     // For non-variable fields, only accept hex characters
     if (!field.isVariable) {
@@ -103,11 +99,13 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
         const filtered = inputValue.replace(/[^0-9A-Fa-f\s]/g, '');
         const formatted = formatHexValue(filtered);
         setEditingFields(prev => ({ ...prev, [id]: formatted }));
-        updateField(id, { value: parseHexValue(formatted) });
+        const actualLength = calculateByteLength(parseHexValue(formatted), 'hex', true);
+        updateField(id, { value: parseHexValue(formatted), length: actualLength });
       } else {
         // Text type - accept any input
         setEditingFields(prev => ({ ...prev, [id]: inputValue }));
-        updateField(id, { value: inputValue });
+        const actualLength = calculateByteLength(inputValue, 'text', true);
+        updateField(id, { value: inputValue, length: actualLength });
       }
     }
   };
@@ -135,7 +133,9 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
         newValue = hexToText(field.value);
       }
 
-      updateField(id, { valueType: newType, value: newValue });
+      // 更新长度为新类型的实际字节长度
+      const newLength = calculateByteLength(newValue, newType, true);
+      updateField(id, { valueType: newType, value: newValue, length: newLength });
     }
   };
 
@@ -195,7 +195,17 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
       render: (isVariable: boolean, record: ProtocolField) => (
         <Checkbox
           checked={isVariable || false}
-          onChange={(e) => updateField(record.id, { isVariable: e.target.checked, valueType: e.target.checked ? 'text' : undefined })}
+          onChange={(e) => {
+            const updates: Partial<ProtocolField> = {
+              isVariable: e.target.checked,
+              valueType: e.target.checked ? 'text' : undefined,
+            };
+            // 如果勾选为 variable，更新长度为实际字节长度
+            if (e.target.checked) {
+              updates.length = calculateByteLength(record.value || '', 'text', true);
+            }
+            updateField(record.id, updates);
+          }}
           style={{ color: '#cccccc' }}
         />
       ),
@@ -206,23 +216,19 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
       key: 'length',
       width: 80,
       render: (length: number | undefined, record: ProtocolField) => (
-        <InputNumber
-          value={length}
-          onChange={(value) => updateField(record.id, { length: value || 1 })}
-          min={1}
-          max={1024}
-          disabled={record.isVariable}
-          size="small"
-          className="protocol-field-input"
-          style={{
-            width: '100%',
-            ...(record.isVariable && {
-              color: '#555555',
-              cursor: 'not-allowed',
-              opacity: 0.6,
-            }),
-          }}
-        />
+        record.isVariable ? (
+          <span style={{ color: '#858585', fontSize: 14 }}>{length || 0}</span>
+        ) : (
+          <InputNumber
+            value={length}
+            onChange={(value) => updateField(record.id, { length: value || 1 })}
+            min={1}
+            max={1024}
+            size="small"
+            className="protocol-field-input"
+            style={{ width: '100%' }}
+          />
+        )
       ),
     },
     {
@@ -335,7 +341,7 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
   ];
 
   return (
-    <div ref={containerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ marginBottom: 8, flexShrink: 0 }}>
         <Button
           icon={<PlusOutlined />}
@@ -345,18 +351,26 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
           Add Field
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={fields}
-        rowKey="id"
-        pagination={false}
-        size="small"
-        scroll={{ y: tableHeight }}
+      <div
         style={{
-          background: '#252526',
           flex: 1,
+          minHeight: 0,
+          background: '#252526',
         }}
-      />
+      >
+        <Table
+          columns={columns}
+          dataSource={fields}
+          rowKey="id"
+          pagination={false}
+          size="small"
+          scroll={{ y: 300 }}
+          style={{
+            background: '#252526',
+          }}
+          tableLayout="fixed"
+        />
+      </div>
     </div>
   );
 }

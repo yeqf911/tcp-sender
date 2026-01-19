@@ -5,7 +5,9 @@ import { connectionService } from '../services/connectionService';
 import { messageService } from '../services/messageService';
 import { protocolService, Protocol as SavedProtocol } from '../services/protocolService';
 import ProtocolFieldEditor from '../components/ProtocolFieldEditor';
+import ProtocolHexPreview from '../components/ProtocolHexPreview';
 import ResponseViewer from '../components/ResponseViewer';
+import { useFontSize } from '../contexts/FontSizeContext';
 import type { ProtocolField } from '../types/protocol-simple';
 
 const { TextArea } = Input;
@@ -63,6 +65,10 @@ interface TabData {
 }
 
 export default function Messages() {
+  const { fontSize } = useFontSize();
+  // 计算 HexPreview 容器宽度（与 ProtocolHexPreview 中的计算一致）
+  const hexPreviewWidth = Math.ceil(75 * fontSize * 0.6 + 16);
+
   const [activeTab, setActiveTab] = useState(() => {
     const saved = loadState();
     return saved?.activeTab || '1';
@@ -366,7 +372,7 @@ export default function Messages() {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1e1e1e' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#1e1e1e', overflow: 'hidden' }}>
       {/* Tabs at the top */}
       <div style={{ background: '#252526', borderBottom: '1px solid #2d2d30' }}>
         <Tabs
@@ -428,8 +434,8 @@ export default function Messages() {
           .compressible-tabs .ant-tabs-add {
             flex-shrink: 0 !important;
             margin-left: 2px !important;
-          }
-        `}</style>
+          }`
+        }</style>
       </div>
 
       {/* Connection Controls */}
@@ -480,15 +486,14 @@ export default function Messages() {
 
       {/* Split Workspace */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Request Editor (Top Half) */}
+        {/* Request Editor */}
         <div
           style={{
-            flex: 1,
+            height: 'auto',
             display: 'flex',
             flexDirection: 'column',
             background: '#252526',
             borderBottom: '1px solid #2d2d30',
-            minHeight: 200,
           }}
         >
           <div
@@ -543,12 +548,21 @@ export default function Messages() {
               <Button size="small">Format</Button>
             </Space>
           </div>
-          <div style={{ flex: 1, padding: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {currentTab.requestMode === 'protocol' ? (
-              <ProtocolFieldEditor
-                fields={currentTab.protocolFields}
-                onChange={(fields) => updateTab(activeTab, { protocolFields: fields })}
-              />
+              <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0 }}>
+                {/* Left: Field Editor (自适应) */}
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                  <ProtocolFieldEditor
+                    fields={currentTab.protocolFields}
+                    onChange={(fields) => updateTab(activeTab, { protocolFields: fields })}
+                  />
+                </div>
+                {/* Right: Hex Preview (动态宽度) */}
+                <div style={{ width: hexPreviewWidth, overflow: 'hidden', flexShrink: 0 }}>
+                  <ProtocolHexPreview hexData={buildProtocolData()} />
+                </div>
+              </div>
             ) : (
               <TextArea
                 value={currentTab.requestData}
@@ -570,8 +584,15 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* Response Viewer (Bottom Half) */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#252526', minHeight: 200 }}>
+        {/* Response Viewer */}
+        <div style={{ 
+				flex: 1, 
+				display: 'flex', 
+				flexDirection: 'column', 
+				background: '#252526', 
+				minHeight: 0,
+				paddingBottom: '50px'
+			}}>
           <div
             style={{
               padding: '8px 16px',
@@ -579,7 +600,7 @@ export default function Messages() {
               borderBottom: '1px solid #2d2d30',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              justifyContent: 'space-between'
             }}
           >
             <Space>
@@ -591,7 +612,7 @@ export default function Messages() {
               <Button size="small">Save</Button>
             </Space>
           </div>
-          <div style={{ flex: 1, padding: 16, overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflow: 'hidden', minHeight: 0, height: '100%' }}>
             <ResponseViewer data={currentTab.responseData} />
           </div>
         </div>
@@ -599,3 +620,4 @@ export default function Messages() {
     </div>
   );
 }
+                                                     
