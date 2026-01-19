@@ -18,7 +18,8 @@
       "Bash(source ~/.nvm/nvm.sh)",
       "Bash(node test-server.js:*)",
       "Bash(node test-server.cjs:*)",
-      "Bash(npm run tauri dev:*)"
+      "Bash(npm run tauri dev:*)",
+      "Bash(npm run build:*)"
     ]
   },
   "sandbox": {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, Space, Input, Tabs, message as antMessage } from 'antd';
+import { Button, Select, Space, Input, Tabs, message as antMessage, Modal } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { connectionService } from '../services/connectionService';
 import { messageService } from '../services/messageService';
@@ -93,6 +93,12 @@ export default function Messages() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [savedProtocols, setSavedProtocols] = useState<SavedProtocol[]>([]);
+
+  // Save protocol modal state
+  const [saveProtocolModalVisible, setSaveProtocolModalVisible] = useState(false);
+  const [newProtocolName, setNewProtocolName] = useState('');
+  const [newProtocolDescription, setNewProtocolDescription] = useState('');
+  const [isSavingProtocol, setIsSavingProtocol] = useState(false);
 
   // Load saved protocols on mount
   useEffect(() => {
@@ -201,6 +207,69 @@ export default function Messages() {
       }
     } catch (error) {
       antMessage.error('Failed to load protocol: ' + error);
+    }
+  };
+
+  const openSaveProtocolModal = () => {
+    if (currentTab.protocolFields.length === 0) {
+      antMessage.warning('Please add at least one field before saving');
+      return;
+    }
+    setNewProtocolName('');
+    setNewProtocolDescription('');
+    setSaveProtocolModalVisible(true);
+  };
+
+  const handleSaveAsProtocol = async () => {
+    if (!newProtocolName.trim()) {
+      antMessage.error('Protocol name is required');
+      return;
+    }
+
+    if (currentTab.protocolFields.length === 0) {
+      antMessage.error('Please add at least one field');
+      return;
+    }
+
+    try {
+      setIsSavingProtocol(true);
+
+      // Prepare field data (generate new IDs)
+      const fields = currentTab.protocolFields.map((field, index) => ({
+        id: `field_${Date.now()}_${index}`,
+        name: field.name,
+        length: field.length,
+        isVariable: field.isVariable ?? false,
+        valueType: field.valueType ?? 'hex',
+        value: field.value || '',
+        description: field.description,
+      }));
+
+      const newProtocol = await protocolService.createProtocol({
+        name: newProtocolName.trim(),
+        description: newProtocolDescription.trim() || undefined,
+        fields,
+      });
+
+      antMessage.success('Protocol saved successfully');
+
+      // Refresh protocol list
+      const updatedProtocols = await protocolService.listProtocols();
+      setSavedProtocols(updatedProtocols);
+
+      // Auto-apply the newly saved protocol
+      updateTab(activeTab, {
+        selectedProtocolPreset: newProtocol.id,
+      });
+
+      // Close modal and reset form
+      setSaveProtocolModalVisible(false);
+      setNewProtocolName('');
+      setNewProtocolDescription('');
+    } catch (error) {
+      antMessage.error('Failed to save protocol: ' + error);
+    } finally {
+      setIsSavingProtocol(false);
     }
   };
 
@@ -556,6 +625,15 @@ export default function Messages() {
               )}
             </Space>
             <Space>
+              {currentTab.requestMode === 'protocol' && (
+                <Button
+                  size="small"
+                  type="primary"
+                  onClick={openSaveProtocolModal}
+                >
+                  Save as Protocol
+                </Button>
+              )}
               <Button size="small" onClick={() => {
                 if (currentTab.requestMode === 'protocol') {
                   updateTab(activeTab, { protocolFields: [], responseData: '', responseTime: 0 });
@@ -649,6 +727,46 @@ export default function Messages() {
           </div>
         </div>
       </div>
+
+      {/* Save as Protocol Modal */}
+      <Modal
+        title="Save as Protocol"
+        open={saveProtocolModalVisible}
+        onOk={handleSaveAsProtocol}
+        onCancel={() => setSaveProtocolModalVisible(false)}
+        okText="Save"
+        cancelText="Cancel"
+        confirmLoading={isSavingProtocol}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+          <div>
+            <div style={{ marginBottom: 8, color: '#cccccc' }}>
+              Protocol Name <span style={{ color: '#ff4d4f' }}>*</span>
+            </div>
+            <Input
+              value={newProtocolName}
+              onChange={(e) => setNewProtocolName(e.target.value)}
+              placeholder="Enter protocol name"
+              maxLength={100}
+            />
+          </div>
+          <div>
+            <div style={{ marginBottom: 8, color: '#cccccc' }}>
+              Description
+            </div>
+            <Input.TextArea
+              value={newProtocolDescription}
+              onChange={(e) => setNewProtocolDescription(e.target.value)}
+              placeholder="Enter description (optional)"
+              rows={3}
+              maxLength={500}
+            />
+          </div>
+          <div style={{ color: '#858585', fontSize: 12 }}>
+            Fields: {currentTab.protocolFields.length}
+          </div>
+        </Space>
+      </Modal>
     </div>
   );
 }

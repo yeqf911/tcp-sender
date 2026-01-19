@@ -157,7 +157,7 @@ export default function Protocols() {
       title: 'Last Updated',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      width: 180,
+      width: 220,
       render: (date: string) => (
         <span style={{ color: '#858585' }}>{new Date(date).toLocaleString()}</span>
       ),
