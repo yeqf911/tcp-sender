@@ -116,13 +116,13 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
   const footerHeight = fontSize + 8;
 
   return (
-    <div style={{ display: 'flex', gap: '8px', height: '100%', padding: '8px' }}>
+    <div style={{ display: 'flex', gap: '8px', height: '100%', padding: '8px', background: '#252526' }}>
       {/* Left: Decoded Text display - 占据剩余空间 */}
       <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        background: '#1e1e1e',
+        //background: '#ff0000',
         minWidth: 0,
       }}>
         {/* Header */}
@@ -151,6 +151,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
           height: isTextEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
           overflow: 'auto',
           padding: '8px',
+		   background: '#1e1e1e'
         }}>
           {isTextEmpty ? (
             <Empty
@@ -180,6 +181,8 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
             color: '#858585',
             height: footerHeight,
             boxSizing: 'border-box',
+			  background: '#1e1e1e',
+		     paddingBottom: 20
           }}>
             Total: {textDisplay.length} chars
           </div>
@@ -191,7 +194,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         width: hexPreviewWidth,
         display: 'flex',
         flexDirection: 'column',
-        background: '#1e1e1e',
+        //background: '#1e1e1e',
       }}>
         {/* Header */}
         <div style={{
@@ -219,6 +222,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
           height: isHexEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
           overflow: 'auto',
           padding: '8px',
+		   background: '#1e1e1e'
         }}>
           {isHexEmpty ? (
             <Empty
@@ -252,7 +256,9 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
             fontSize: fontSize - 3,
             color: '#858585',
             height: footerHeight,
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+			  background: '#1e1e1e',
+		     paddingBottom: 20
           }}>
             Total: {(data.replace(/\s/g, '').length / 2).toFixed(0)} bytes
           </div>

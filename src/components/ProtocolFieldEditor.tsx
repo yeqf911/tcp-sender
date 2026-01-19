@@ -341,8 +341,20 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
   ];
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ marginBottom: 8, flexShrink: 0 }}>
+    <div style={{ 
+			height: '100%', 
+			display: 'flex', 
+			flexDirection: 'column', 
+			overflow: 'hidden',
+			//background: '#000000',
+			marginLeft: 8
+		}}>
+      <div style={{ 
+			flexShrink: 0,
+			paddingBotom: 0,
+			paddingTop: 8,
+			paddingLeft: 8
+		}}>
         <Button
           icon={<PlusOutlined />}
           onClick={addField}
@@ -355,7 +367,8 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
         style={{
           flex: 1,
           minHeight: 0,
-          background: '#252526',
+          //background: '#252526',
+          //background: '#ff00ff',
         }}
       >
         <Table
@@ -364,7 +377,7 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
           rowKey="id"
           pagination={false}
           size="small"
-          scroll={{ y: 300 }}
+          scroll={{ y: 250 }}
           style={{
             background: '#252526',
           }}

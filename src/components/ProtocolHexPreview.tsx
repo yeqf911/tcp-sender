@@ -95,16 +95,35 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
       flexDirection: 'column',
       background: '#252526',
     }}>
+    	<div style={{
+      	  padding: '0px 8px',
+      	  borderBottom: '1px solid #2d2d30',
+      	  display: 'flex',
+      	  justifyContent: 'space-between',
+      	  alignItems: 'center',
+      	  flexShrink: 0,
+	   	  //background: '#ff00ff',
+    	}}>
+         <Button
+          type="text"
+          size="small"
+          style={{
+              color: isEmpty ? '#555555' : '#cccccc',
+              fontSize: fontSize - 2
+          }}></Button></div>
+    
       {/* Header */}
       <div style={{
-        padding: '8px',
+        padding: '0px 8px',
         borderBottom: '1px solid #2d2d30',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
+		 //background: '#ff00ff',
+		 padding: '6px 0px 8px 8px'
       }}>
-        <span style={{ color: '#cccccc', fontSize, fontWeight: 500 }}>Hex Preview</span>
+        <span style={{ color: '#cccccc', fontSize, fontWeight: 500}}>Hex Preview</span>
         <Button
           type="text"
           size="small"
@@ -119,12 +138,13 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
 
       {/* Content - 与左侧 Table 内容对齐 */}
       <div style={{
-        height: 300,
+        height: '100%',
         overflow: 'auto',
         paddingLeft: '8px',
         paddingTop: '4px',
         paddingBottom: '4px',
         paddingRight: '8px',
+		 background: '#1e1e1e'
       }}>
         {isEmpty ? (
           <Empty
@@ -157,6 +177,8 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
           padding: '4px 8px',
           fontSize: fontSize - 3,
           color: '#858585',
+		   background: '#1e1e1e',
+		   //magin: 0
         }}>
           Total: {(hexData.replace(/\s/g, '').length / 2).toFixed(0)} bytes
         </div>

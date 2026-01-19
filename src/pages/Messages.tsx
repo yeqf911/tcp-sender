@@ -548,7 +548,15 @@ export default function Messages() {
               <Button size="small">Format</Button>
             </Space>
           </div>
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div style={{ 
+					flex: 1, 
+					overflow: 'hidden', 
+					display: 'flex', 
+					flexDirection: 'column', 
+					minHeight: 0,
+					//background: '#00ff00',
+					//height: '50%'
+				}}>
             {currentTab.requestMode === 'protocol' ? (
               <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0 }}>
                 {/* Left: Field Editor (自适应) */}
@@ -559,7 +567,13 @@ export default function Messages() {
                   />
                 </div>
                 {/* Right: Hex Preview (动态宽度) */}
-                <div style={{ width: hexPreviewWidth, overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ 
+						//width: hexPreviewWidth, 
+						overflow: 'hidden', 
+						flexShrink: 0, 
+						marginRight: 8,
+						//marginBottom: 0
+					}}>
                   <ProtocolHexPreview hexData={buildProtocolData()} />
                 </div>
               </div>
@@ -589,7 +603,7 @@ export default function Messages() {
 				flex: 1, 
 				display: 'flex', 
 				flexDirection: 'column', 
-				background: '#252526', 
+				//background: '#0000ff',
 				minHeight: 0,
 				paddingBottom: '50px'
 			}}>
