@@ -649,7 +649,7 @@ export default function Messages() {
 					//height: '50%'
 				}}>
             {currentTab.requestMode === 'protocol' ? (
-              <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0 }}>
+              <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0, paddingBottom: '8px' }}>
                 {/* Left: Field Editor (自适应) */}
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                   <ProtocolFieldEditor

@@ -96,23 +96,44 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
       background: '#252526',
       //borderRadius: '40px'
     }}>
-    	<div style={{
-      	  //padding: '0px 8px',
-      	  borderBottom: '0px solid #2d2d30',
-      	  display: 'flex',
-      	  justifyContent: 'space-between',
-      	  alignItems: 'center',
-      	  flexShrink: 0,
-		  //paddingTop: 2,
-	   	  //background: '#ff00ff',
-    	}}>
-         <Button
-          type="text"
-          size="small"
-          style={{
-              color: isEmpty ? '#555555' : '#cccccc',
-              fontSize: fontSize - 2
-          }}></Button></div>
+
+
+ <div style={{ 
+			flexShrink: 0,
+			paddingBottom: 0,
+			paddingTop: 8,
+			paddingLeft: 8,
+      //background: '#8c0b0b'
+		}}>
+      <Button size="small" style={{ visibility: 'hidden' }}>test</Button>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          maxHeight: 300,
+          overflow: 'hidden',
+          background: '#252526',
+          //background: '#0f0fb1',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          borderBottom: '0px solid #3e3e42',
+          background: '#252526',
+          // background: 'rgb(53, 148, 53)',
+          flexShrink: 0,
+        }}>
+          <div style={{ width: 140, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Field Name</div>
+          <div style={{ width: 100, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Variable</div>
+          <div style={{ width: 80, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Length</div>
+          <div style={{ flex: 1, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Value</div>
+          <div style={{ width: 100, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Actions</div>
+        </div>
+      </div>
+
     
       {/* Header */}
       <div style={{
@@ -121,10 +142,10 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
-		 //background: '#ff00ff',
-		 padding: '12px 0px 6px 0px'
+		    //background: '#ff00ff',
+		    // padding: '12px 0px 6px 0px'
       }}>
-        <span style={{ color: '#cccccc', fontSize, fontWeight: 500 }}>Hex Preview</span>
+        <span style={{ color: '#cccccc', fontSize, fontWeight: 500, padding: '8px' }}>Hex Preview</span>
         <Button
           type="text"
           size="small"

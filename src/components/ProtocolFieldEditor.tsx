@@ -421,14 +421,15 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
 			display: 'flex', 
 			flexDirection: 'column', 
 			overflow: 'hidden',
-			//background: '#000000',
+			//background: '#8c0b0b',
 			marginLeft: 8
 		}}>
       <div style={{ 
 			flexShrink: 0,
 			paddingBottom: 0,
 			paddingTop: 8,
-			paddingLeft: 8
+			paddingLeft: 8,
+      //background: '#8c0b0b'
 		}}>
         <Button
           icon={<PlusOutlined />}
@@ -442,9 +443,10 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
         style={{
           flex: 1,
           minHeight: 0,
-          maxHeight: 250,
+          maxHeight: 320,
           overflow: 'hidden',
           background: '#252526',
+          //background: '#0f0fb1',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -453,6 +455,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
           display: 'flex',
           borderBottom: '0px solid #3e3e42',
           background: '#252526',
+          //background: '#359435',
           flexShrink: 0,
         }}>
           <div style={{ width: 140, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Field Name</div>
