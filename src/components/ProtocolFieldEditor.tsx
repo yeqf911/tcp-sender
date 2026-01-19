@@ -1,15 +1,24 @@
 import { Button, Input, InputNumber, Table, Popconfirm, Checkbox, Tooltip } from 'antd';
 import { PlusOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import type { ProtocolField } from '../types/protocol-simple';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 
 interface ProtocolFieldEditorProps {
   fields: ProtocolField[];
   onChange: (fields: ProtocolField[]) => void;
 }
 
-export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
+function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
   const [editingFields, setEditingFields] = useState<Record<string, string>>({});
+
+  // Use ref to store fields and onChange to avoid columns re-creation
+  const fieldsRef = useRef(fields);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    fieldsRef.current = fields;
+    onChangeRef.current = onChange;
+  }, [fields, onChange]);
 
   // Format hex value with spaces between bytes
   const formatHexValue = (value: string, maxLength?: number): string => {
@@ -50,24 +59,25 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
   };
 
   const addField = () => {
+    const currentFields = fieldsRef.current;
     const newField: ProtocolField = {
       id: `field_${Date.now()}`,
-      name: `Field${fields.length + 1}`,
+      name: `Field${currentFields.length + 1}`,
       length: 1,
       isVariable: false,
       valueType: 'text',
       value: '',
     };
-    onChange([...fields, newField]);
+    onChangeRef.current([...currentFields, newField]);
   };
 
-  const updateField = (id: string, updates: Partial<ProtocolField>) => {
-    onChange(
-      fields.map((field) =>
+  const updateField = useCallback((id: string, updates: Partial<ProtocolField>) => {
+    onChangeRef.current(
+      fieldsRef.current.map((field) =>
         field.id === id ? { ...field, ...updates } : field
       )
     );
-  };
+  }, []);
 
   // 计算值的实际字节长度
   const calculateByteLength = (value: string, valueType: 'text' | 'hex', isVariable: boolean): number => {
@@ -86,7 +96,7 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     return 0;
   };
 
-  const handleValueChange = (id: string, inputValue: string, field: ProtocolField) => {
+  const handleValueChange = useCallback((id: string, inputValue: string, field: ProtocolField) => {
     // For non-variable fields, only accept hex characters
     if (!field.isVariable) {
       const filtered = inputValue.replace(/[^0-9A-Fa-f\s]/g, '');
@@ -108,18 +118,18 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
         updateField(id, { value: inputValue, length: actualLength });
       }
     }
-  };
+  }, []);
 
-  const handleValueBlur = (id: string) => {
+  const handleValueBlur = useCallback((id: string) => {
     setEditingFields(prev => {
       const newEditing = { ...prev };
       delete newEditing[id];
       return newEditing;
     });
-  };
+  }, []);
 
-  const toggleValueType = (id: string) => {
-    const field = fields.find(f => f.id === id);
+  const toggleValueType = useCallback((id: string) => {
+    const field = fieldsRef.current.find(f => f.id === id);
     if (field?.isVariable) {
       const newType = field.valueType === 'text' ? 'hex' : 'text';
       let newValue = field.value;
@@ -137,40 +147,44 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
       const newLength = calculateByteLength(newValue, newType, true);
       updateField(id, { valueType: newType, value: newValue, length: newLength });
     }
-  };
+  }, []);
 
-  const deleteField = (id: string) => {
-    onChange(fields.filter((field) => field.id !== id));
-  };
+  const deleteField = useCallback((id: string) => {
+    onChangeRef.current(fieldsRef.current.filter((field) => field.id !== id));
+  }, []);
 
-  const moveFieldUp = (index: number) => {
+  const moveFieldUp = useCallback((index: number) => {
+    const currentFields = fieldsRef.current;
     if (index === 0) return;
-    const newFields = [...fields];
+    const newFields = [...currentFields];
     [newFields[index - 1], newFields[index]] = [newFields[index], newFields[index - 1]];
-    onChange(newFields);
-  };
+    onChangeRef.current(newFields);
+  }, []);
 
-  const moveFieldDown = (index: number) => {
-    if (index === fields.length - 1) return;
-    const newFields = [...fields];
+  const moveFieldDown = useCallback((index: number) => {
+    const currentFields = fieldsRef.current;
+    if (index === currentFields.length - 1) return;
+    const newFields = [...currentFields];
     [newFields[index], newFields[index + 1]] = [newFields[index + 1], newFields[index]];
-    onChange(newFields);
-  };
+    onChangeRef.current(newFields);
+  }, []);
 
-  const insertFieldAfter = (index: number) => {
+  const insertFieldAfter = useCallback((index: number) => {
+    const currentFields = fieldsRef.current;
     const newField: ProtocolField = {
       id: `field_${Date.now()}`,
-      name: `Field${fields.length + 1}`,
+      name: `Field${currentFields.length + 1}`,
       length: 1,
       isVariable: false,
       valueType: 'text',
       value: '',
     };
-    const newFields = [...fields];
+    const newFields = [...currentFields];
     newFields.splice(index + 1, 0, newField);
-    onChange(newFields);
-  };
+    onChangeRef.current(newFields);
+  }, []);
 
+  // Create columns once with refs to avoid re-renders
   const columns = [
     {
       title: 'Field Name',
@@ -236,18 +250,18 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
       dataIndex: 'value',
       key: 'value',
       render: (text: string, record: ProtocolField) => {
-        let displayValue = editingFields[record.id] !== undefined ? editingFields[record.id] : text;
-
-        // Format hex values for display (for non-variable or hex-type fields)
-        const shouldFormatHex = !record.isVariable || record.valueType === 'hex';
-        if (text && shouldFormatHex && /^[0-9A-Fa-f\s]+$/.test(text)) {
-          const clean = text.replace(/\s/g, '');
-          if (clean.length > 0 && clean.length % 2 === 0) {
-            displayValue = editingFields[record.id] !== undefined
-              ? editingFields[record.id]
-              : formatHexValue(text, !record.isVariable && record.length ? record.length : undefined);
-          }
-        }
+        const displayValue = editingFields[record.id] !== undefined
+          ? editingFields[record.id]
+          : (() => {
+              const shouldFormatHex = !record.isVariable || record.valueType === 'hex';
+              if (text && shouldFormatHex && /^[0-9A-Fa-f\s]+$/.test(text)) {
+                const clean = text.replace(/\s/g, '');
+                if (clean.length > 0 && clean.length % 2 === 0) {
+                  return formatHexValue(text, !record.isVariable && record.length ? record.length : undefined);
+                }
+              }
+              return text;
+            })();
 
         const placeholder =
           record.isVariable && record.valueType === 'text'
@@ -291,52 +305,55 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
       title: 'Actions',
       key: 'action',
       width: 100,
-      render: (_: any, record: ProtocolField, index: number) => (
-        <div style={{ display: 'flex', gap: 2 }}>
-          <Tooltip title="Insert Below">
-            <Button
-              type="text"
-              size="small"
-              icon={<PlusCircleOutlined />}
-              onClick={() => insertFieldAfter(index)}
-              style={{ color: '#4ec9b0' }}
-            />
-          </Tooltip>
-          <Tooltip title="Move Up">
-            <Button
-              type="text"
-              size="small"
-              icon={<ArrowUpOutlined />}
-              onClick={() => moveFieldUp(index)}
-              disabled={index === 0}
-              style={{ color: index === 0 ? '#555555' : '#cccccc' }}
-            />
-          </Tooltip>
-          <Tooltip title="Move Down">
-            <Button
-              type="text"
-              size="small"
-              icon={<ArrowDownOutlined />}
-              onClick={() => moveFieldDown(index)}
-              disabled={index === fields.length - 1}
-              style={{ color: index === fields.length - 1 ? '#555555' : '#cccccc' }}
-            />
-          </Tooltip>
-          <Popconfirm
-            title="Are you sure to delete this field?"
-            onConfirm={() => deleteField(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              type="text"
-              danger
-              size="small"
-              icon={<DeleteOutlined />}
-            />
-          </Popconfirm>
-        </div>
-      ),
+      render: (_: any, record: ProtocolField, index: number) => {
+        const currentFields = fieldsRef.current;
+        return (
+          <div style={{ display: 'flex', gap: 2 }}>
+            <Tooltip title="Insert Below">
+              <Button
+                type="text"
+                size="small"
+                icon={<PlusCircleOutlined />}
+                onClick={() => insertFieldAfter(index)}
+                style={{ color: '#4ec9b0' }}
+              />
+            </Tooltip>
+            <Tooltip title="Move Up">
+              <Button
+                type="text"
+                size="small"
+                icon={<ArrowUpOutlined />}
+                onClick={() => moveFieldUp(index)}
+                disabled={index === 0}
+                style={{ color: index === 0 ? '#555555' : '#cccccc' }}
+              />
+            </Tooltip>
+            <Tooltip title="Move Down">
+              <Button
+                type="text"
+                size="small"
+                icon={<ArrowDownOutlined />}
+                onClick={() => moveFieldDown(index)}
+                disabled={index === currentFields.length - 1}
+                style={{ color: index === currentFields.length - 1 ? '#555555' : '#cccccc' }}
+              />
+            </Tooltip>
+            <Popconfirm
+              title="Are you sure to delete this field?"
+              onConfirm={() => deleteField(record.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="text"
+                danger
+                size="small"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
+          </div>
+        );
+      },
     },
   ];
 
@@ -367,17 +384,18 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
         style={{
           flex: 1,
           minHeight: 0,
-          //background: '#252526',
-          //background: '#ff00ff',
+          maxHeight: 250,
+          overflow: 'auto',
+          background: '#252526',
         }}
       >
         <Table
+          key="protocol-fields-table"
           columns={columns}
           dataSource={fields}
           rowKey="id"
           pagination={false}
           size="small"
-          scroll={{ y: 250 }}
           style={{
             background: '#252526',
           }}
@@ -387,3 +405,5 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     </div>
   );
 }
+
+export default memo(ProtocolFieldEditor);
