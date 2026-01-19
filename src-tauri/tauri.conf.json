@@ -14,7 +14,10 @@
       {
         "title": "PacketForge",
         "width": 1600,
-        "height": 1000
+        "height": 1000,
+        "backgroundColor": "#1e1e1e",
+        "transparent": false,
+        "decorations": true
       }
     ],
     "security": {

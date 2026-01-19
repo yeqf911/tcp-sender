@@ -17,7 +17,8 @@
       "Bash(cargo --version:*)",
       "Bash(source ~/.nvm/nvm.sh)",
       "Bash(node test-server.js:*)",
-      "Bash(node test-server.cjs:*)"
+      "Bash(node test-server.cjs:*)",
+      "Bash(npm run tauri dev:*)"
     ]
   },
   "sandbox": {

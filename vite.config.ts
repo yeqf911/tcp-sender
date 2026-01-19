@@ -29,4 +29,27 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+
+  // 生产构建优化
+  build: {
+    target: "es2020",
+    minify: "esbuild",
+    sourcemap: false,
+    // 优化 chunk 分割
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 将 React 相关库单独打包
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          // 将 Ant Design 单独打包
+          "antd-vendor": ["antd", "@ant-design/icons"],
+        },
+      },
+    },
+  },
+
+  // 优化依赖预构建
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-router-dom", "antd"],
+  },
 }));
