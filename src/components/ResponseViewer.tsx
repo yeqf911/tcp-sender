@@ -151,7 +151,8 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
           height: isTextEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
           overflow: 'auto',
           padding: '8px',
-		   background: '#1e1e1e'
+		   background: '#1e1e1e',
+		   borderRadius: '4px 4px 0 0'
         }}>
           {isTextEmpty ? (
             <Empty
@@ -182,7 +183,8 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
             height: footerHeight,
             boxSizing: 'border-box',
 			  background: '#1e1e1e',
-		     paddingBottom: 20
+		     paddingBottom: 20,
+			   borderRadius: '0 0 4px 4px'
           }}>
             Total: {textDisplay.length} chars
           </div>
@@ -222,7 +224,8 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
           height: isHexEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
           overflow: 'auto',
           padding: '8px',
-		   background: '#1e1e1e'
+		   background: '#1e1e1e',
+		   borderRadius: '4px 4px 0 0'
         }}>
           {isHexEmpty ? (
             <Empty
@@ -258,7 +261,8 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
             height: footerHeight,
             boxSizing: 'border-box',
 			  background: '#1e1e1e',
-		     paddingBottom: 20
+		     paddingBottom: 20,
+			   borderRadius: '0 0 4px 4px'
           }}>
             Total: {(data.replace(/\s/g, '').length / 2).toFixed(0)} bytes
           </div>

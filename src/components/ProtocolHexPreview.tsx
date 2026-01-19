@@ -145,7 +145,8 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
         paddingTop: '4px',
         paddingBottom: '4px',
         paddingRight: '8px',
-		 background: '#1e1e1e'
+		 background: '#1e1e1e',
+		 borderRadius: '4px 4px 0 0'
       }}>
         {isEmpty ? (
           <Empty
@@ -179,7 +180,7 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
           fontSize: fontSize - 3,
           color: '#858585',
 		   background: '#1e1e1e',
-		   //magin: 0
+		   borderRadius: '0 0 4px 4px'
         }}>
           Total: {(hexData.replace(/\s/g, '').length / 2).toFixed(0)} bytes
         </div>
