@@ -175,7 +175,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         {/* Footer info - 固定在容器底部 */}
         {!isTextEmpty && (
           <div style={{
-            padding: '4px 8px',
+            padding: '10px 8px',
             fontSize: fontSize - 3,
             color: '#858585',
             height: footerHeight,
@@ -192,7 +192,6 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         display: 'flex',
         flexDirection: 'column',
         background: '#1e1e1e',
-		 padding: '8px'
       }}>
         {/* Header */}
         <div style={{
@@ -219,10 +218,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         <div style={{
           height: isHexEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
           overflow: 'auto',
-          paddingLeft: '8px',
-          paddingTop: '4px',
-          paddingBottom: '4px',
-          paddingRight: '8px',
+          padding: '8px',
         }}>
           {isHexEmpty ? (
             <Empty
@@ -252,7 +248,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         {/* Footer info - 固定在容器底部 */}
         {!isHexEmpty && (
           <div style={{
-            padding: '4px 8px',
+            padding: '10px 8px',
             fontSize: fontSize - 3,
             color: '#858585',
             height: footerHeight,
