@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "packetforge",
+  "productName": "PacketForge",
   "version": "1.3.0",
   "identifier": "com.nicole.packetforge",
   "build": {

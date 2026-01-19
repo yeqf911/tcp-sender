@@ -1,5 +1,5 @@
-import { Button, Input, InputNumber, Table, Popconfirm, Checkbox } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Input, InputNumber, Table, Popconfirm, Checkbox, Tooltip } from 'antd';
+import { PlusOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import type { ProtocolField } from '../types/protocol-simple';
 import { useState, useRef, useEffect } from 'react';
 
@@ -143,6 +143,34 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     onChange(fields.filter((field) => field.id !== id));
   };
 
+  const moveFieldUp = (index: number) => {
+    if (index === 0) return;
+    const newFields = [...fields];
+    [newFields[index - 1], newFields[index]] = [newFields[index], newFields[index - 1]];
+    onChange(newFields);
+  };
+
+  const moveFieldDown = (index: number) => {
+    if (index === fields.length - 1) return;
+    const newFields = [...fields];
+    [newFields[index], newFields[index + 1]] = [newFields[index + 1], newFields[index]];
+    onChange(newFields);
+  };
+
+  const insertFieldAfter = (index: number) => {
+    const newField: ProtocolField = {
+      id: `field_${Date.now()}`,
+      name: `Field${fields.length + 1}`,
+      length: 1,
+      isVariable: false,
+      valueType: 'text',
+      value: '',
+    };
+    const newFields = [...fields];
+    newFields.splice(index + 1, 0, newField);
+    onChange(newFields);
+  };
+
   const columns = [
     {
       title: 'Field Name',
@@ -238,7 +266,7 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
                 onClick={() => toggleValueType(record.id)}
                 style={{
                   padding: '0 8px',
-                  height: 25,
+                  height: 24,
                   fontSize: 12,
                   minWidth: 40,
                   background: record.valueType === 'text' ? '#3e3e42' : '#2d2d30',
@@ -256,21 +284,52 @@ export default function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldE
     {
       title: 'Actions',
       key: 'action',
-      width: 90,
-      render: (_: any, record: ProtocolField) => (
-        <Popconfirm
-          title="Are you sure to delete this field?"
-          onConfirm={() => deleteField(record.id)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button
-            type="text"
-            danger
-            size="small"
-            icon={<DeleteOutlined />}
-          />
-        </Popconfirm>
+      width: 100,
+      render: (_: any, record: ProtocolField, index: number) => (
+        <div style={{ display: 'flex', gap: 2 }}>
+          <Tooltip title="Insert Below">
+            <Button
+              type="text"
+              size="small"
+              icon={<PlusCircleOutlined />}
+              onClick={() => insertFieldAfter(index)}
+              style={{ color: '#4ec9b0' }}
+            />
+          </Tooltip>
+          <Tooltip title="Move Up">
+            <Button
+              type="text"
+              size="small"
+              icon={<ArrowUpOutlined />}
+              onClick={() => moveFieldUp(index)}
+              disabled={index === 0}
+              style={{ color: index === 0 ? '#555555' : '#cccccc' }}
+            />
+          </Tooltip>
+          <Tooltip title="Move Down">
+            <Button
+              type="text"
+              size="small"
+              icon={<ArrowDownOutlined />}
+              onClick={() => moveFieldDown(index)}
+              disabled={index === fields.length - 1}
+              style={{ color: index === fields.length - 1 ? '#555555' : '#cccccc' }}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Are you sure to delete this field?"
+            onConfirm={() => deleteField(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              type="text"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+        </div>
       ),
     },
   ];
