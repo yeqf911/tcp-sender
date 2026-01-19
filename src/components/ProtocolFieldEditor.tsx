@@ -408,7 +408,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
         <div style={{
           flex: 1,
           overflow: 'auto',
-          background: '#252526',
+          background: '#1e1e1e',
           borderRadius: '4px',
         }}>
           <Table

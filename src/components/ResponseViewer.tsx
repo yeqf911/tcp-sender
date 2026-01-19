@@ -143,7 +143,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
             style={{ color: isTextEmpty ? '#555555' : '#cccccc', fontSize: fontSize - 2 }}
           >
             Copy
-          </Button>还是
+          </Button>
         </div>
 
         {/* Content - 使用calc计算高度，确保Footer可见 */}
@@ -175,7 +175,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         </div>
 
         {/* Footer info - 固定在容器底部 */}
-        {!isTextEmpty && (
+        { (
           <div style={{
             padding: '10px 8px',
             fontSize: fontSize - 3,
@@ -186,7 +186,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
 		     paddingBottom: 20,
 			   borderRadius: '0 0 4px 4px'
           }}>
-            Total: {textDisplay.length} chars
+		     {isHexEmpty ? ('') : (<span>Total: {textDisplay.length} chars</span>)}
           </div>
         )}
       </div>
@@ -253,7 +253,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         </div>
 
         {/* Footer info - 固定在容器底部 */}
-        {!isHexEmpty && (
+        { (
           <div style={{
             padding: '10px 8px',
             fontSize: fontSize - 3,
@@ -264,7 +264,7 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
 		     paddingBottom: 20,
 			   borderRadius: '0 0 4px 4px'
           }}>
-            Total: {(data.replace(/\s/g, '').length / 2).toFixed(0)} bytes
+		     {isHexEmpty ? ('') : (<span>Total: {(data.replace(/\s/g, '').length / 2).toFixed(0)} bytes</span>)}
           </div>
         )}
       </div>

@@ -190,20 +190,22 @@ export default function Messages() {
 
   const addTab = () => {
     const newKey = String(tabs.length + 1);
-    const previousTab = tabs[tabs.length - 1];
+    // 获取当前活动标签页作为参考
+    const currentTab = tabs.find(tab => tab.key === activeTab) || tabs[tabs.length - 1];
 
     const newTab: TabData = {
       key: newKey,
       label: `New Connection ${newKey}`,
       closable: true,
-      host: previousTab.host,
-      port: previousTab.port,
+      host: currentTab.host,
+      port: currentTab.port,
       isConnected: false,
       requestMode: 'protocol',
       requestData: '',
       responseData: '',
       responseTime: 0,
       protocolFields: [],
+      selectedProtocolPreset: undefined,
     };
 
     setTabs([...tabs, newTab]);

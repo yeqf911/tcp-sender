@@ -94,6 +94,7 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
       display: 'flex',
       flexDirection: 'column',
       background: '#252526',
+      //borderRadius: '40px'
     }}>
     	<div style={{
       	  //padding: '0px 8px',
@@ -115,16 +116,16 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
     
       {/* Header */}
       <div style={{
-        padding: '0px 8px',
+        padding: '0px 0px',
         borderBottom: '0px solid #2d2d30',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
 		 //background: '#ff00ff',
-		 padding: '10px 0px 8px 8px'
+		 padding: '12px 0px 6px 0px'
       }}>
-        <span style={{ color: '#cccccc', fontSize, fontWeight: 500}}>Hex Preview</span>
+        <span style={{ color: '#cccccc', fontSize, fontWeight: 500 }}>Hex Preview</span>
         <Button
           type="text"
           size="small"
@@ -146,13 +147,13 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
         paddingBottom: '4px',
         paddingRight: '8px',
 		 background: '#1e1e1e',
-		 borderRadius: '4px 4px 0 0'
+		 borderRadius: '4px 4px 0px 0px'
       }}>
         {isEmpty ? (
           <Empty
             description="No data"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            style={{ color: '#858585', marginTop: 40 }}
+            style={{ color: '#858585', marginTop: 40, borderRadius: '4px'}}
           />
         ) : (
           <div style={{
@@ -174,7 +175,7 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
       </div>
 
       {/* Footer info */}
-      {!isEmpty && (
+      { (
         <div style={{
           padding: '4px 8px',
           fontSize: fontSize - 3,
@@ -182,7 +183,7 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
 		   background: '#1e1e1e',
 		   borderRadius: '0 0 4px 4px'
         }}>
-          Total: {(hexData.replace(/\s/g, '').length / 2).toFixed(0)} bytes
+			{isEmpty ? ('') : (<span>Total: {(hexData.replace(/\s/g, '').length / 2).toFixed(0)} bytes</span>)}
         </div>
       )}
     </div>
