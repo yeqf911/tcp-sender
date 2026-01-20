@@ -608,7 +608,7 @@ export default function Messages() {
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#1e1e1e', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1e1e1e', overflow: 'hidden' }}>
       {/* Tabs at the top */}
       <div style={{ background: '#252526', borderBottom: '1px solid #2d2d30' }}>
         <Tabs
@@ -714,7 +714,7 @@ export default function Messages() {
         <Input
           placeholder="Host"
           size="small"
-          style={{ width: 165, }}
+          style={{ width: 165, height: 26}}
           value={currentTab.host}
           onChange={(e) => updateTab(activeTab, { host: e.target.value })}
           disabled={currentTab.isConnected}
@@ -722,7 +722,7 @@ export default function Messages() {
         <Input
           placeholder="Port"
           size="small"
-          style={{ width: 100, }}
+          style={{ width: 100, height: 26 }}
           value={currentTab.port}
           onChange={(e) => updateTab(activeTab, { port: e.target.value })}
           disabled={currentTab.isConnected}
@@ -779,7 +779,7 @@ export default function Messages() {
               <Select
                 value={currentTab.requestMode}
                 onChange={(value) => updateTab(activeTab, { requestMode: value })}
-                style={{ width: 120 }}
+                style={{ width: 120, height: 26}}
                 options={[
                   { value: 'protocol', label: 'Protocol' },
                   { value: 'text', label: 'Text' },
@@ -794,7 +794,7 @@ export default function Messages() {
                     value={currentTab.selectedProtocolPreset}
                     onChange={handleProtocolPresetChange}
                     placeholder="Select saved protocol"
-                    style={{ width: 180 }}
+                    style={{ width: 180, height: 26 }}
                     options={savedProtocols.map(protocol => ({
                       value: protocol.id,
                       label: protocol.name,
@@ -887,8 +887,7 @@ export default function Messages() {
 				flex: 1,
 				display: 'flex',
 				flexDirection: 'column',
-				minHeight: 0,
-				paddingBottom: '50px'
+				minHeight: 0
 			}}>
           <div
             style={{
@@ -924,6 +923,7 @@ export default function Messages() {
         okText="Save"
         cancelText="Cancel"
         confirmLoading={isSavingProtocol}
+        style={{ }}
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div>
