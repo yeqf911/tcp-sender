@@ -159,16 +159,19 @@ export default function ProtocolHexPreview({ hexData }: ProtocolHexPreviewProps)
       </div>
 
       {/* Content - 与左侧 Table 内容对齐 */}
-      <div style={{
-        height: '100%',
-        overflow: 'auto',
-        paddingLeft: '8px',
-        paddingTop: '4px',
-        paddingBottom: '4px',
-        paddingRight: '8px',
-		 background: '#1e1e1e',
-		 borderRadius: '4px 4px 0px 0px'
-      }}>
+      <div
+        className="selectable-content"
+        style={{
+          height: '100%',
+          overflow: 'auto',
+          paddingLeft: '8px',
+          paddingTop: '4px',
+          paddingBottom: '4px',
+          paddingRight: '8px',
+           background: '#1e1e1e',
+           borderRadius: '4px 4px 0px 0px'
+        }}
+      >
         {isEmpty ? (
           <Empty
             description="No data"

@@ -689,33 +689,37 @@ export default function Messages() {
       >
         <Input
           placeholder="Host"
-          style={{ width: 150 }}
+          size="small"
+          style={{ width: 165, }}
           value={currentTab.host}
           onChange={(e) => updateTab(activeTab, { host: e.target.value })}
           disabled={currentTab.isConnected}
         />
         <Input
           placeholder="Port"
-          style={{ width: 100 }}
+          size="small"
+          style={{ width: 100, }}
           value={currentTab.port}
           onChange={(e) => updateTab(activeTab, { port: e.target.value })}
           disabled={currentTab.isConnected}
         />
         {!currentTab.isConnected ? (
-          <Button type="primary" onClick={handleConnect} loading={isLoading}>
+          <Button type="primary" size="small" style={{ }} onClick={handleConnect} loading={isLoading} >
             Connect
           </Button>
         ) : (
           <>
             <Button
               type="primary"
+              size="small"
               icon={<SendOutlined />}
+              style={{ }}
               onClick={handleSend}
               loading={isLoading}
             >
               Send
             </Button>
-            <Button onClick={handleDisconnect} loading={isLoading}>
+            <Button size="small" style={{ }} onClick={handleDisconnect} loading={isLoading}>
               Disconnect
             </Button>
           </>

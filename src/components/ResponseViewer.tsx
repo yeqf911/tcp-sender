@@ -147,13 +147,16 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         </div>
 
         {/* Content - 使用calc计算高度，确保Footer可见 */}
-        <div style={{
-          height: isTextEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
-          overflow: 'auto',
-          padding: '8px',
-		   background: '#1e1e1e',
-		   borderRadius: '4px 4px 0 0'
-        }}>
+        <div
+          className="selectable-content"
+          style={{
+            height: isTextEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
+            overflow: 'auto',
+            padding: '8px',
+             background: '#1e1e1e',
+             borderRadius: '4px 4px 0 0'
+          }}
+        >
           {isTextEmpty ? (
             <Empty
               description="No data"
@@ -220,13 +223,16 @@ export default function ResponseViewer({ data }: ResponseViewerProps) {
         </div>
 
         {/* Content - 使用calc计算高度，确保Footer可见 */}
-        <div style={{
-          height: isHexEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
-          overflow: 'auto',
-          padding: '8px',
-		   background: '#1e1e1e',
-		   borderRadius: '4px 4px 0 0'
-        }}>
+        <div
+          className="selectable-content"
+          style={{
+            height: isHexEmpty ? '100%' : `calc(100% - 50px - ${footerHeight}px)`,
+            overflow: 'auto',
+            padding: '8px',
+             background: '#1e1e1e',
+             borderRadius: '4px 4px 0 0'
+          }}
+        >
           {isHexEmpty ? (
             <Empty
               description="No data"

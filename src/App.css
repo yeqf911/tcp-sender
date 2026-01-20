@@ -120,6 +120,51 @@ select {
   font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace !important;
 }
 
+/* Prevent text selection in UI (except inputs and content areas) */
+body,
+#root,
+.ant-btn,
+.ant-tabs-tab,
+.ant-table-cell,
+.ant-select,
+.ant-select-item,
+.ant-checkbox-wrapper,
+.ant-radio-wrapper,
+.ant-modal,
+.ant-modal-title,
+.ant-modal-content,
+.ant-modal-header,
+.ant-modal-footer,
+.ant-popconfirm,
+.ant-tooltip,
+.ant-message,
+.ant-space,
+.ant-tag,
+.ant-divider {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Allow text selection in inputs and content areas */
+input,
+textarea,
+.ant-input,
+.ant-input-number-input,
+.ant-select-selection-item,
+pre,
+code,
+.ant-modal-body,
+.allow-select,
+.selectable-content,
+.selectable-content * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
 /* Flat design - input borders match background */
 .ant-input,
 .ant-input-number,
