@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, Select, Space, Input, Tabs, message as antMessage, Modal } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { connectionService } from '../services/connectionService';
@@ -10,6 +10,104 @@ import ResponseViewer from '../components/ResponseViewer';
 import type { ProtocolField } from '../types/protocol-simple';
 
 const { TextArea } = Input;
+
+// Resizable Splitter Component
+interface ResizableSplitterProps {
+  containerId: string;
+  onDragEnd: (newPercent: number) => void;
+}
+
+function ResizableSplitter({ containerId, onDragEnd }: ResizableSplitterProps) {
+  const splitterRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startYRef = useRef(0);
+  const startPercentRef = useRef(50);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const requestDiv = container.children[0] as HTMLElement;
+    if (!requestDiv) return;
+
+    isDraggingRef.current = true;
+    startYRef.current = e.clientY;
+    // 获取当前 Request div 的高度百分比作为基准
+    const currentHeightPercent = parseFloat(requestDiv.style.height) || 50;
+    startPercentRef.current = currentHeightPercent;
+
+    splitterRef.current!.style.background = '#ff6c37';
+    document.body.style.cursor = 'row-resize';
+    document.body.style.webkitUserSelect = 'none';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+
+      const deltaY = e.clientY - startYRef.current;
+      const containerHeight = container.getBoundingClientRect().height;
+      const deltaPercent = (deltaY / containerHeight) * 100;
+      const newPercent = Math.max(10, Math.min(90, startPercentRef.current + deltaPercent));
+
+      // Directly update DOM without React re-render
+      const requestDiv = container.children[0] as HTMLElement;
+      if (requestDiv) {
+        requestDiv.style.height = `${newPercent}%`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!isDraggingRef.current) return;
+
+      isDraggingRef.current = false;
+      splitterRef.current!.style.background = '#3e3e42';
+      document.body.style.cursor = '';
+      document.body.style.webkitUserSelect = '';
+      document.body.style.userSelect = '';
+
+      const requestDiv = container.children[0] as HTMLElement;
+      const currentHeight = parseFloat(requestDiv.style.height);
+      onDragEnd(currentHeight);
+
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove, { passive: false });
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  return (
+    <div
+      ref={splitterRef}
+      onMouseDown={handleMouseDown}
+      style={{
+        height: '2px',
+        background: '#3e3e42',
+        cursor: 'row-resize',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+    >
+      <div
+        style={{
+          width: '40px',
+          height: '2px',
+          background: '#858585',
+          borderRadius: '1px',
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
+  );
+}
 
 // localStorage keys
 const MESSAGES_STATE_KEY = 'tcp_sender_messages_state';
@@ -89,11 +187,18 @@ export default function Messages() {
   const [isLoading, setIsLoading] = useState(false);
   const [savedProtocols, setSavedProtocols] = useState<SavedProtocol[]>([]);
 
+  // Splitter state
+  const [requestHeightPercent, setRequestHeightPercent] = useState(50);
+
   // Save protocol modal state
   const [saveProtocolModalVisible, setSaveProtocolModalVisible] = useState(false);
   const [newProtocolName, setNewProtocolName] = useState('');
   const [newProtocolDescription, setNewProtocolDescription] = useState('');
   const [isSavingProtocol, setIsSavingProtocol] = useState(false);
+
+  const handleSplitterDragEnd = (newPercent: number) => {
+    setRequestHeightPercent(newPercent);
+  };
 
   // Load saved protocols on mount
   useEffect(() => {
@@ -581,15 +686,16 @@ export default function Messages() {
       </div>
 
       {/* Split Workspace */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div id="split-workspace" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Request Editor */}
         <div
           style={{
-            height: 'auto',
+            height: `${requestHeightPercent}%`,
             display: 'flex',
             flexDirection: 'column',
             background: '#252526',
             borderBottom: '1px solid #2d2d30',
+            overflow: 'hidden',
           }}
         >
           <div
@@ -600,6 +706,7 @@ export default function Messages() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              flexShrink: 0,
             }}
           >
             <Space>
@@ -653,14 +760,12 @@ export default function Messages() {
               <Button size="small">Format</Button>
             </Space>
           </div>
-          <div style={{ 
-					flex: 1, 
-					overflow: 'hidden', 
-					display: 'flex', 
-					flexDirection: 'column', 
+          <div style={{
+					flex: 1,
+					overflow: 'hidden',
+					display: 'flex',
+					flexDirection: 'column',
 					minHeight: 0,
-					//background: '#00ff00',
-					//height: '50%'
 				}}>
             {currentTab.requestMode === 'protocol' ? (
               <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0, paddingBottom: '8px' }}>
@@ -672,12 +777,10 @@ export default function Messages() {
                   />
                 </div>
                 {/* Right: Hex Preview (动态宽度) */}
-                <div style={{ 
-						//width: hexPreviewWidth, 
-						overflow: 'hidden', 
-						flexShrink: 0, 
+                <div style={{
+						overflow: 'hidden',
+						flexShrink: 0,
 						marginRight: 8,
-						//marginBottom: 0
 					}}>
                   <ProtocolHexPreview hexData={buildProtocolData()} />
                 </div>
@@ -703,12 +806,17 @@ export default function Messages() {
           </div>
         </div>
 
+        {/* Resizable Splitter */}
+        <ResizableSplitter
+          containerId="split-workspace"
+          onDragEnd={handleSplitterDragEnd}
+        />
+
         {/* Response Viewer */}
-        <div style={{ 
-				flex: 1, 
-				display: 'flex', 
-				flexDirection: 'column', 
-				//background: '#0000ff',
+        <div style={{
+				flex: 1,
+				display: 'flex',
+				flexDirection: 'column',
 				minHeight: 0,
 				paddingBottom: '50px'
 			}}>

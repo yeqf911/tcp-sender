@@ -291,8 +291,8 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
           value={text}
           onChange={(e) => updateField(record.id, { name: e.target.value })}
           placeholder="Field name"
-          size="small"
           className="protocol-field-input"
+          style={{ padding: '12px 8px', height: 24 }}
         />
       ),
     },
@@ -348,7 +348,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
       width: 80,
       render: (length: number | undefined, record: ProtocolField) => (
         record.isVariable ? (
-          <span style={{ color: '#858585', fontSize: 14 }}>{length || 0}</span>
+          <span style={{ color: '#858585', fontSize: fontSize, padding: 0 }}>{length || 0}</span>
         ) : (
           <InputNumber
             value={length}
@@ -374,9 +374,9 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
             }}
             min={1}
             max={1024}
-            size="small"
+            // size="large"
             className="protocol-field-input"
-            style={{ width: '100%' }}
+            style={{ width: '100%', height: 26 }}
           />
         )
       ),
@@ -415,9 +415,8 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
               onChange={(e) => handleValueChange(record.id, e.target.value, record)}
               onBlur={() => handleValueBlur(record.id)}
               placeholder={placeholder}
-              size="small"
               className="protocol-field-input"
-              style={{ flex: 1 }}
+              style={{ flex: 1, padding: '12px 8px', height: 24 }}
             />
             {record.isVariable ? (
               <Button
@@ -426,7 +425,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
                 onClick={() => toggleValueType(record.id)}
                 style={{
                   padding: '0 8px',
-                  height: 20,
+                  height: 24,
                   fontSize: fontSize-2,
                   minWidth: 46,
                   background: record.valueType === 'text' ? '#3e3e42' : '#2d2d30',
@@ -443,7 +442,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
                 onClick={() => toggleValueFormat(record.id)}
                 style={{
                   padding: '0 8px',
-                  height: 20,
+                  height: 24,
                   fontSize: fontSize-2,
                   minWidth: 46,
                   background: (record.valueFormat ?? 'dec') === 'dec' ? '#3e3e42' : '#2d2d30',
@@ -466,11 +465,13 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
         const currentFields = fieldsRef.current;
         return (
           <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Checkbox
-              checked={record.enabled ?? true}
-              onChange={(e) => updateField(record.id, { enabled: e.target.checked })}
-              style={{ margin: '0px', paddingRight: '4px', }}
-            />
+            <Tooltip title="Optional">
+              <Checkbox
+                checked={record.enabled ?? true}
+                onChange={(e) => updateField(record.id, { enabled: e.target.checked })}
+                style={{ margin: '0px', paddingRight: '4px'}}
+              />
+            </Tooltip>
             <Tooltip title="Insert Below">
               <Button
                 type="text"
@@ -533,7 +534,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
 			paddingBottom: 0,
 			paddingTop: 8,
 			paddingLeft: 8,
-      //background: '#8c0b0b'
+      // background: '#8c0b0b'
 		}}>
         <Button
           icon={<PlusOutlined />}
@@ -547,10 +548,10 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
         style={{
           flex: 1,
           minHeight: 0,
-          maxHeight: 320,
+          //maxHeight: 320,
           overflow: 'hidden',
           background: '#252526',
-          //background: '#0f0fb1',
+          // background: '#0f0fb1',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -559,7 +560,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
           display: 'flex',
           borderBottom: '0px solid #3e3e42',
           background: '#252526',
-          //background: '#359435',
+          // background: '#359435',
           flexShrink: 0,
         }}>
           <div style={{ width: 140, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Field Name</div>
@@ -571,8 +572,10 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
         <div style={{
           flex: 1,
           overflow: 'auto',
-          background: '#1e1e1e',
+          // background: '#1e1e1e',
+          // background: 'rgba(130, 58, 58, 1)',
           borderRadius: '4px',
+          borderBottom: '0px solid #3e3e42',
         }}>
           <Table
             key="protocol-fields-table"
