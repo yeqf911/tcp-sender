@@ -374,7 +374,13 @@ export default function Messages() {
   };
 
   const addTab = () => {
-    const newKey = String(tabs.length + 1);
+    // Generate a unique key by finding the maximum existing key and incrementing
+    const maxKey = tabs.reduce((max, tab) => {
+      const numKey = parseInt(tab.key, 10);
+      return !isNaN(numKey) && numKey > max ? numKey : max;
+    }, 0);
+    const newKey = String(maxKey + 1);
+
     // 获取当前活动标签页作为参考
     const currentTab = tabs.find(tab => tab.key === activeTab) || tabs[tabs.length - 1];
 
@@ -398,6 +404,11 @@ export default function Messages() {
   };
 
   const removeTab = (targetKey: string) => {
+    // Prevent deleting the last tab
+    if (tabs.length <= 1) {
+      return;
+    }
+
     // Disconnect if connected
     const tabToRemove = tabs.find(tab => tab.key === targetKey);
     if (tabToRemove?.isConnected) {
@@ -587,11 +598,37 @@ export default function Messages() {
           items={tabs.map((tab) => ({
             key: tab.key,
             label: tab.label,
-            closable: tab.closable,
+            closable: tabs.length > 1, // Only show close button when there's more than one tab
           }))}
           style={{ margin: 0 }}
           className="compressible-tabs"
           hideAdd={false}
+          tabBarExtraContent={
+            <Button
+              size="small"
+              onClick={() => {
+                localStorage.removeItem(MESSAGES_STATE_KEY);
+                setActiveTab('1');
+                setTabs([{
+                  key: '1',
+                  label: 'New Connection 1',
+                  closable: false,
+                  host: '127.0.0.1',
+                  port: '8080',
+                  isConnected: false,
+                  requestMode: 'protocol',
+                  requestData: '',
+                  responseData: '',
+                  responseTime: 0,
+                  protocolFields: [],
+                }]);
+                antMessage.success('Tab history cleared');
+              }}
+              style={{ marginRight: 8 }}
+            >
+              Clear History
+            </Button>
+          }
         />
         <style>{`
           .compressible-tabs .ant-tabs-nav {

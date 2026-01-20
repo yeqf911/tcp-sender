@@ -256,6 +256,37 @@ impl Database {
             ],
         )?;
 
+        // Dubbo2 Protocol
+        insert_protocol(
+            "preset_dubbo",
+            "Dubbo",
+            "Dubbo2 protocol frame format (16 bytes header)",
+            vec![
+                ("magic_high", "Magic High", Some(1), false, "hex", "DA"), // 0xda
+                ("magic_low", "Magic Low", Some(1), false, "hex", "BB"), // 0xbb
+                ("flag", "Flag/Serialization", Some(1), false, "hex", "82"), // Req/Res=1, TwoWay=1, Hessian=2
+                ("status", "Status", Some(1), false, "hex", "14"), // OK = 20 = 0x14
+                ("req_id_hi", "Request ID High", Some(4), false, "hex", "00 00 00 00"),
+                ("req_id_lo", "Request ID Low", Some(4), false, "hex", "00 00 00 01"),
+                ("data_len", "Data Length", Some(4), false, "hex", "00 00 00 00"),
+            ],
+        )?;
+
+        // Triple Protocol (HTTP/2 based)
+        insert_protocol(
+            "preset_triple",
+            "Triple",
+            "Triple protocol frame format (HTTP/2/gRPC based)",
+            vec![
+                ("frame_len_hi", "Frame Length High", Some(1), false, "hex", "00"),
+                ("frame_len_lo", "Frame Length Low", Some(2), false, "hex", "00 00"),
+                ("frame_type", "Frame Type", Some(1), false, "hex", "00"), // DATA = 0
+                ("flags", "Flags", Some(1), false, "hex", "01"), // END_STREAM = 1
+                ("stream_id", "Stream ID", Some(4), false, "hex", "00 00 00 01"),
+                ("payload", "Payload", None, true, "hex", ""),
+            ],
+        )?;
+
         Ok(())
     }
 

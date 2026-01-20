@@ -345,7 +345,7 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
       title: 'Length',
       dataIndex: 'length',
       key: 'length',
-      width: 80,
+      width: 100,
       render: (length: number | undefined, record: ProtocolField) => (
         record.isVariable ? (
           <span style={{ color: '#858585', fontSize: fontSize, padding: 0 }}>{length || 0}</span>
