@@ -14,7 +14,38 @@ function AppContent() {
   useEffect(() => {
     // Apply zoom to body element
     document.body.style.zoom = `${zoom}%`;
+
+    // When zoom < 100%, we need larger container to fill viewport after shrinking
+    // When zoom > 100%, we need smaller container to fit viewport after expanding
+    const zoomFactor = zoom / 100;
+
+    // Calculate the height needed BEFORE zoom to get viewport height AFTER zoom
+    // Formula: needed_height = viewport_height / zoomFactor
+    const viewportHeight = window.innerHeight;
+    const neededHeight = viewportHeight / zoomFactor;
+
+    document.documentElement.style.setProperty('--vh', `${neededHeight}px`);
+    document.documentElement.style.setProperty('--zoom-factor', zoomFactor.toString());
+
+    // Also adjust #root height directly using vh unit
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.height = `${100 / zoomFactor}vh`;
+    }
   }, [zoom]);
+
+  useEffect(() => {
+    // Update --vh on resize
+    const handleResize = () => {
+      const zoomFactor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom-factor') || '1');
+      const viewportHeight = window.innerHeight;
+      const neededHeight = viewportHeight / zoomFactor;
+      document.documentElement.style.setProperty('--vh', `${neededHeight}px`);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <ConfigProvider

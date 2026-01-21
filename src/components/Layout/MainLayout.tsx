@@ -25,8 +25,13 @@ export default function MainLayout() {
       .catch(() => setAppVersion('1.0.0'));
   }, []);
 
+  // Calculate adjusted height based on zoom
+  const zoomFactor = zoom / 100;
+  const adjustedLayoutHeight = `min(${100 / zoomFactor}vh, 10000px)`;
+  const adjustedContentHeight = `min(calc(${100 / zoomFactor}vh - 48px), 10000px)`;
+
   return (
-    <Layout style={{ minHeight: '100vh', background: '#1e1e1e' }}>
+    <Layout style={{ minHeight: adjustedLayoutHeight, background: '#1e1e1e' }}>
       <Layout style={{ flexDirection: 'row' }}>
         <Sider
           width={50}
@@ -108,7 +113,7 @@ export default function MainLayout() {
           <Content
             style={{
               background: '#1e1e1e',
-              minHeight: 'calc(100vh - 48px)',
+              height: adjustedContentHeight,
               overflow: 'auto',
             }}
           >
