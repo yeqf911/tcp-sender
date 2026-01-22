@@ -12,15 +12,85 @@ interface ProtocolFieldEditorProps {
 function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
   const { fontSize } = useFontSize();
   const [editingFields, setEditingFields] = useState<Record<string, string>>({});
+  const [focusedRowIndex, setFocusedRowIndex] = useState<number | null>(null);
 
   // Use ref to store fields and onChange to avoid columns re-creation
   const fieldsRef = useRef(fields);
   const onChangeRef = useRef(onChange);
 
+  // Store refs for table container and rows
+  const listContainerRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+
   useEffect(() => {
     fieldsRef.current = fields;
     onChangeRef.current = onChange;
   }, [fields, onChange]);
+
+  // Scroll row into view
+  const scrollRowIntoView = useCallback((rowIndex: number) => {
+    const row = rowRefs.current[`row-${rowIndex}`];
+    const container = listContainerRef.current;
+    if (!row || !container) return;
+
+    const rowTop = row.offsetTop;
+    const rowBottom = rowTop + row.offsetHeight;
+    const containerTop = container.scrollTop;
+    const containerBottom = containerTop + container.offsetHeight;
+    const buffer = 10; // Extra buffer
+
+    if (rowTop < containerTop + buffer) {
+      // Row is above visible area, scroll up
+      container.scrollTop = Math.max(0, rowTop - buffer);
+    } else if (rowBottom > containerBottom - buffer) {
+      // Row is below visible area, scroll down
+      container.scrollTop = rowBottom - container.offsetHeight + buffer;
+    }
+  }, []);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+    const currentFields = fieldsRef.current;
+    if (currentFields.length === 0) return;
+
+    let newIndex = focusedRowIndex ?? 0;
+
+    if (e.key === 'ArrowUp') {
+      newIndex = Math.max(0, newIndex - 1);
+    } else if (e.key === 'ArrowDown') {
+      newIndex = Math.min(currentFields.length - 1, newIndex + 1);
+    }
+
+    e.preventDefault();
+    setFocusedRowIndex(newIndex);
+
+    // Scroll the new row into view
+    setTimeout(() => scrollRowIntoView(newIndex), 0);
+  }, [focusedRowIndex, scrollRowIntoView]);
+
+  // Handle container click to set focus
+  const handleContainerClick = useCallback(() => {
+    if (focusedRowIndex === null && fields.length > 0) {
+      setFocusedRowIndex(0);
+    }
+  }, [focusedRowIndex, fields.length]);
+
+  useEffect(() => {
+    const container = listContainerRef.current;
+    if (!container) return;
+
+    container.addEventListener('keydown', handleKeyDown);
+    container.addEventListener('click', handleContainerClick);
+    // Make container focusable
+    container.tabIndex = 0;
+
+    return () => {
+      container.removeEventListener('keydown', handleKeyDown);
+      container.removeEventListener('click', handleContainerClick);
+    };
+  }, [handleKeyDown, handleContainerClick]);
 
   // Format hex value with spaces between bytes
   const formatHexValue = (value: string, maxLength?: number): string => {
@@ -649,14 +719,18 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
           <div style={{ flex: 1, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Value</div>
           <div style={{ width: 120, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Actions</div>
         </div>
-        <div style={{
-          flex: 1,
-          overflow: 'auto',
-          // background: '#1e1e1e',
-          // background: 'rgba(130, 58, 58, 1)',
-          borderRadius: '4px',
-          borderBottom: '0px solid #3e3e42',
-        }}>
+        <div
+          ref={listContainerRef}
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            // background: '#1e1e1e',
+            // background: 'rgba(130, 58, 58, 1)',
+            borderRadius: '4px',
+            borderBottom: '0px solid #3e3e42',
+            outline: 'none',
+          }}
+        >
           <Table
             key="protocol-fields-table"
             columns={columns}
@@ -669,9 +743,14 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
               background: '#252526',
             }}
             tableLayout="fixed"
-            onRow={(record) => ({
+            onRow={(record, index) => ({
               style: {
                 opacity: record.enabled === false ? 0.4 : 1,
+                background: focusedRowIndex === index ? 'rgba(255, 108, 55, 0.15)' : undefined,
+                boxShadow: focusedRowIndex === index ? 'inset 2px 0 0 0 #ff6c37' : undefined,
+              },
+              ref: (el: HTMLTableRowElement | null) => {
+                rowRefs.current[`row-${index}`] = el;
               },
             })}
           />
