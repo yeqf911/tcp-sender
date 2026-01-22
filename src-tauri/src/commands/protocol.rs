@@ -1,7 +1,9 @@
 use crate::database::DbPool;
-use crate::models::{Protocol, ProtocolField, CreateProtocolRequest, UpdateProtocolRequest};
+use crate::models::{Protocol, ProtocolField, CreateProtocolRequest, UpdateProtocolRequest, ProtocolImport};
 use chrono::Utc;
-use tauri::State;
+use std::fs;
+use tauri::{AppHandle, State};
+use tauri_plugin_dialog::DialogExt;
 use uuid::Uuid;
 
 type DbResult<T = ()> = Result<T, String>;
@@ -250,4 +252,134 @@ pub fn delete_protocol(db_pool: State<DbPool>, id: String) -> DbResult<()> {
         Ok(())
     })
     .map_err(|e| e.to_string())
+}
+
+/// Export protocol to JSON file
+#[tauri::command]
+pub async fn export_protocol_to_file(
+    protocol_id: String,
+    app: AppHandle,
+    db_pool: State<'_, DbPool>,
+) -> Result<(), String> {
+    // Get protocol data
+    let protocol = get_protocol(db_pool, protocol_id)?;
+
+    let protocol = protocol.ok_or("Protocol not found")?;
+
+    // Generate safe filename from protocol name
+    let safe_name = protocol.name
+        .chars()
+        .map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .collect::<String>();
+    let default_filename = format!("{}.json", safe_name);
+
+    // Show save dialog
+    let file_path = app
+        .dialog()
+        .file()
+        .add_filter("JSON Files", &["json"])
+        .add_filter("All Files", &["*"])
+        .set_file_name(&default_filename)
+        .set_title("Export Protocol")
+        .blocking_save_file();
+
+    let file_path = file_path.ok_or("No file selected")?;
+
+    // Serialize to JSON
+    let export_data = serde_json::to_string_pretty(&protocol).map_err(|e| e.to_string())?;
+
+    // Write to file
+    let path = file_path.as_path().ok_or("Invalid file path")?;
+    fs::write(path, export_data).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+/// Import protocol from JSON file
+#[tauri::command]
+pub async fn import_protocol_from_file(app: AppHandle) -> Result<ProtocolImport, String> {
+    // Show open dialog
+    let file_path = app
+        .dialog()
+        .file()
+        .add_filter("JSON Files", &["json"])
+        .add_filter("All Files", &["*"])
+        .set_title("Import Protocol")
+        .blocking_pick_file();
+
+    let file_path = file_path.ok_or("No file selected")?;
+
+    // Read file content
+    let path = file_path.as_path().ok_or("Invalid file path")?;
+    let content = fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))?;
+
+    // Parse JSON
+    let import_data: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
+    // Validate structure
+    let name = import_data.get("name")
+        .and_then(|v| v.as_str())
+        .ok_or("Missing required field: name")?
+        .to_string();
+
+    let description = import_data.get("description")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string());
+
+    let fields_array = import_data.get("fields")
+        .and_then(|v| v.as_array())
+        .ok_or("Missing required field: fields")?;
+
+    let mut fields = Vec::new();
+
+    for (index, field_value) in fields_array.iter().enumerate() {
+        let field_name = field_value.get("name")
+            .and_then(|v| v.as_str())
+            .ok_or(format!("Field at index {}: missing 'name'", index))?
+            .to_string();
+
+        let length = field_value.get("length")
+            .and_then(|v| v.as_i64())
+            .map(|v| v as i32);
+
+        let is_variable = field_value.get("isVariable")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+
+        let value_type = field_value.get("valueType")
+            .and_then(|v| v.as_str())
+            .unwrap_or("hex")
+            .to_string();
+
+        let value_format = field_value.get("valueFormat")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
+        let value = field_value.get("value")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+
+        let description = field_value.get("description")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
+        fields.push(ProtocolField {
+            id: format!("field_{}_{}", chrono::Utc::now().timestamp_millis(), index),
+            name: field_name,
+            length,
+            is_variable,
+            value_type,
+            value_format,
+            value,
+            description,
+        });
+    }
+
+    Ok(ProtocolImport {
+        name,
+        description,
+        fields,
+    })
 }

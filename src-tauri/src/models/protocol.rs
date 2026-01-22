@@ -61,3 +61,12 @@ pub struct UpdateProtocolRequest {
     pub description: Option<String>,
     pub fields: Vec<ProtocolField>,
 }
+
+/// Protocol data for import/export (without id)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProtocolImport {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub fields: Vec<ProtocolField>,
+}

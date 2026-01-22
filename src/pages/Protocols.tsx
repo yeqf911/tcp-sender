@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Table, Modal, Input, Space, Popconfirm, message, Empty, Typography } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined, ImportOutlined, DownloadOutlined } from '@ant-design/icons';
 import ProtocolFieldEditor from '../components/ProtocolFieldEditor';
 import { protocolService, Protocol } from '../services/protocolService';
 import type { ProtocolField } from '../types/protocol-simple';
@@ -100,6 +100,47 @@ export default function Protocols() {
     }
   };
 
+  const handleExport = async (id: string) => {
+    try {
+      await protocolService.exportProtocol(id);
+      message.success('Protocol exported successfully');
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error !== 'No file selected') {
+        message.error('Failed to export protocol: ' + error);
+      }
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const imported = await protocolService.importProtocol();
+
+      // Open edit dialog with imported data
+      setEditingProtocol({
+        name: imported.name,
+        description: imported.description || '',
+        fields: imported.fields.map((f, i) => ({
+          id: `import_${Date.now()}_${i}`,
+          name: f.name,
+          length: f.length,
+          isVariable: f.isVariable ?? false,
+          valueType: f.valueType ?? 'hex',
+          valueFormat: f.valueFormat,
+          value: f.value || '',
+          description: f.description,
+        })),
+      });
+      setModalVisible(true);
+      message.success('Protocol imported successfully');
+    } catch (error) {
+      // User cancelled or error occurred
+      if (typeof error === 'string' && !error.startsWith('No file')) {
+        message.error('Failed to import protocol: ' + error);
+      }
+    }
+  };
+
   const handleSave = async () => {
     if (!editingProtocol) return;
 
@@ -167,7 +208,7 @@ export default function Protocols() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 150,
+      width: 180,
       render: (_: any, record: Protocol) => (
         <Space size="small">
           <Button
@@ -182,6 +223,13 @@ export default function Protocols() {
             size="small"
             icon={<CopyOutlined />}
             onClick={() => handleDuplicate(record)}
+            style={{ color: '#cccccc' }}
+          />
+          <Button
+            type="text"
+            size="small"
+            icon={<DownloadOutlined />}
+            onClick={() => handleExport(record.id)}
             style={{ color: '#cccccc' }}
           />
           <Popconfirm
@@ -208,13 +256,21 @@ export default function Protocols() {
         <Title level={4} style={{ color: '#cccccc', margin: 0 }}>
           Protocol Templates
         </Title>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleCreate}
-        >
-          New Protocol
-        </Button>
+        <Space>
+          <Button
+            icon={<ImportOutlined />}
+            onClick={handleImport}
+          >
+            Import
+          </Button>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleCreate}
+          >
+            New Protocol
+          </Button>
+        </Space>
       </div>
 
       <Table
@@ -237,9 +293,9 @@ export default function Protocols() {
         }}
         style={{
           flex: 1,
-          background: '#1e1e1e',
+          background: '#1e1e1e'
         }}
-        scroll={{ y: 'calc(100vh - 160px)' }}
+        scroll={{ y: 'calc(100vh - 200px)' }}
       />
 
       <Modal

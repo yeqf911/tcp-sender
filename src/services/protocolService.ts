@@ -23,6 +23,12 @@ export interface UpdateProtocolRequest {
   fields: ProtocolField[];
 }
 
+export interface ProtocolImport {
+  name: string;
+  description?: string;
+  fields: ProtocolField[];
+}
+
 export const protocolService = {
   async listProtocols(): Promise<Protocol[]> {
     return await invoke<Protocol[]>('list_protocols');
@@ -42,5 +48,13 @@ export const protocolService = {
 
   async deleteProtocol(id: string): Promise<void> {
     return await invoke<void>('delete_protocol', { id });
+  },
+
+  async exportProtocol(protocolId: string): Promise<void> {
+    return await invoke<void>('export_protocol_to_file', { protocolId });
+  },
+
+  async importProtocol(): Promise<ProtocolImport> {
+    return await invoke<ProtocolImport>('import_protocol_from_file');
   },
 };

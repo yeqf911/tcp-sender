@@ -14,6 +14,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(connection_manager)
         .manage(DbPool::new())
         .setup(|app| {
@@ -54,6 +55,8 @@ pub fn run() {
             commands::create_protocol,
             commands::update_protocol,
             commands::delete_protocol,
+            commands::export_protocol_to_file,
+            commands::import_protocol_from_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
