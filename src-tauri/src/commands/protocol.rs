@@ -1,10 +1,11 @@
 use crate::database::DbPool;
-use crate::models::{Protocol, ProtocolField, CreateProtocolRequest, UpdateProtocolRequest, ProtocolImport};
+use crate::models::{Protocol, ProtocolField, CreateProtocolRequest, UpdateProtocolRequest, ProtocolImport, ProtocolFieldExport};
 use chrono::Utc;
 use std::fs;
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 
 type DbResult<T = ()> = Result<T, String>;
 
@@ -285,12 +286,30 @@ pub async fn export_protocol_to_file(
 
     let file_path = file_path.ok_or("No file selected")?;
 
+    // Convert fields to export format (conditional fields based on isVariable)
+    let export_fields: Vec<ProtocolFieldExport> = protocol.fields.into_iter().map(|f| f.into()).collect();
+
+    // Create export data structure
+    #[derive(Serialize)]
+    struct ExportData {
+        name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+        fields: Vec<ProtocolFieldExport>,
+    }
+
+    let export_data = ExportData {
+        name: protocol.name,
+        description: protocol.description,
+        fields: export_fields,
+    };
+
     // Serialize to JSON
-    let export_data = serde_json::to_string_pretty(&protocol).map_err(|e| e.to_string())?;
+    let json_string = serde_json::to_string_pretty(&export_data).map_err(|e| e.to_string())?;
 
     // Write to file
     let path = file_path.as_path().ok_or("Invalid file path")?;
-    fs::write(path, export_data).map_err(|e| e.to_string())?;
+    fs::write(path, json_string).map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -313,73 +332,9 @@ pub async fn import_protocol_from_file(app: AppHandle) -> Result<ProtocolImport,
     let path = file_path.as_path().ok_or("Invalid file path")?;
     let content = fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))?;
 
-    // Parse JSON
-    let import_data: serde_json::Value = serde_json::from_str(&content)
+    // Parse JSON directly into ProtocolImport
+    let import_data: ProtocolImport = serde_json::from_str(&content)
         .map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
-    // Validate structure
-    let name = import_data.get("name")
-        .and_then(|v| v.as_str())
-        .ok_or("Missing required field: name")?
-        .to_string();
-
-    let description = import_data.get("description")
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string());
-
-    let fields_array = import_data.get("fields")
-        .and_then(|v| v.as_array())
-        .ok_or("Missing required field: fields")?;
-
-    let mut fields = Vec::new();
-
-    for (index, field_value) in fields_array.iter().enumerate() {
-        let field_name = field_value.get("name")
-            .and_then(|v| v.as_str())
-            .ok_or(format!("Field at index {}: missing 'name'", index))?
-            .to_string();
-
-        let length = field_value.get("length")
-            .and_then(|v| v.as_i64())
-            .map(|v| v as i32);
-
-        let is_variable = field_value.get("isVariable")
-            .and_then(|v| v.as_bool())
-            .unwrap_or(false);
-
-        let value_type = field_value.get("valueType")
-            .and_then(|v| v.as_str())
-            .unwrap_or("hex")
-            .to_string();
-
-        let value_format = field_value.get("valueFormat")
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
-
-        let value = field_value.get("value")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        let description = field_value.get("description")
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
-
-        fields.push(ProtocolField {
-            id: format!("field_{}_{}", chrono::Utc::now().timestamp_millis(), index),
-            name: field_name,
-            length,
-            is_variable,
-            value_type,
-            value_format,
-            value,
-            description,
-        });
-    }
-
-    Ok(ProtocolImport {
-        name,
-        description,
-        fields,
-    })
+    Ok(import_data)
 }
