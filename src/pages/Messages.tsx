@@ -8,6 +8,7 @@ import ProtocolFieldEditor from '../components/ProtocolFieldEditor';
 import ProtocolHexPreview from '../components/ProtocolHexPreview';
 import ResponseViewer from '../components/ResponseViewer';
 import type { ProtocolField } from '../types/protocol-simple';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const { TextArea } = Input;
 
@@ -162,6 +163,8 @@ interface TabData {
 }
 
 export default function Messages() {
+  const { fontSize } = useFontSize();
+
   const [activeTab, setActiveTab] = useState(() => {
     const saved = loadState();
     return saved?.activeTab || '1';
@@ -848,29 +851,115 @@ export default function Messages() {
             {/* Two-column layout for all modes */}
             <div style={{ display: 'flex', gap: 8, height: '100%', minHeight: 0, paddingBottom: '8px' }}>
               {/* Left: Input area (自适应) */}
-              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, background: '#252526' }}>
                 {currentTab.requestMode === 'protocol' ? (
                   <ProtocolFieldEditor
                     fields={currentTab.protocolFields}
                     onChange={(fields) => updateTab(activeTab, { protocolFields: fields })}
                   />
                 ) : (
-                  <TextArea
-                    value={currentTab.requestData}
-                    onChange={(e) => updateTab(activeTab, { requestData: e.target.value })}
-                    placeholder={
-                      currentTab.requestMode === 'text'
-                        ? 'Enter text data to send...'
-                        : 'Enter hexadecimal data (e.g., 01 02 03 FF)'
-                    }
-                    style={{
-                      height: '100%',
-                      fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
+                  <>
+                    <div
+                      style={{
+                        // flex: 1,
+                        minHeight: 0,
+                        maxHeight: 32,
+                        overflow: 'hidden',
+                        // background: '#252526',
+                        background: '#0f0fb1',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        visibility: 'hidden'
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        borderBottom: '0px solid #3e3e42',
+                        // background: '#252526',
+                        background: 'rgb(53, 148, 53)',
+                        flexShrink: 0,
+                      }}>
+                        <div style={{ width: 140, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Field Name</div>
+                        <div style={{ width: 100, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Variable</div>
+                        <div style={{ width: 80, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Length</div>
+                        <div style={{ flex: 1, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Value</div>
+                        <div style={{ width: 100, padding: '8px', color: '#cccccc', fontSize, fontWeight: 500 }}>Actions</div>
+                      </div>
+                    </div>
+
+                    {/* Header - aligned with Hex Preview header */}
+                    <div style={{
+                      flexShrink: 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      // background: '#00ff00',
+                      borderBottom: '0px solid #2d2d30',
+                    }}>
+                      <span style={{ color: '#cccccc', fontSize, fontWeight: 500, padding: '8px 8px 8px 16px' }}>
+                        {currentTab.requestMode === 'text' ? 'Text Input' : 'Hex Input'}
+                      </span>
+                      <Button
+                        type="text"
+                        size="small"
+                        // icon={<CopyOutlined />}
+                        // onClick={handleCopy}
+                        // disabled={isEmpty}
+                        style={{ color: '#cccccc', fontSize: fontSize - 2 }}
+                      >
+                        
+                      </Button>
+                    </div>
+                    {/* TextArea with proper height calculation */}
+                    <div style={{
+                      flex: 1,
+                      minHeight: 0,
+                      overflow: 'hidden',
+                      paddingLeft: 8,
+                      paddingRight: 8,
+                      paddingTop: 0,
+                      paddingBottom: 0,
+                    }}>
+                      <TextArea
+                        value={currentTab.requestData}
+                        onChange={(e) => updateTab(activeTab, { requestData: e.target.value })}
+                        placeholder={
+                          currentTab.requestMode === 'text'
+                            ? 'Enter text data to send...'
+                            : 'Enter hexadecimal data (e.g., 01 02 03 FF)'
+                        }
+                        style={{
+                          height: '100%',
+                          fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
+                          background: '#1e1e1e',
+                          color: '#cccccc',
+                          resize: 'none',
+                        }}
+                      />
+                    </div>
+                    {/* Footer info - aligned with Hex Preview footer */}
+                    <div style={{
+                      flexShrink: 0,
+                      padding: '4px 8px',
+                      fontSize: fontSize - 3,
+                      color: '#858585',
                       background: '#1e1e1e',
-                      color: '#cccccc',
-                      resize: 'none',
-                    }}
-                  />
+                      borderRadius: '0 0 4px 4px',
+                      marginLeft: 8,
+                      marginRight: 8,
+                      marginBottom: 0,
+                      paddingBottom: 4
+                    }}>
+                      {currentTab.requestData ? (
+                        <span style={{}}>
+                          {currentTab.requestMode === 'text'
+                            ? `${currentTab.requestData.length} chars`
+                            : `${(currentTab.requestData.replace(/\s/g, '').length / 2).toFixed(0)} bytes`
+                          }
+                        </span>
+                      ) : null}
+                    </div>
+                  </>
                 )}
               </div>
               {/* Right: Hex Preview (动态宽度) */}
