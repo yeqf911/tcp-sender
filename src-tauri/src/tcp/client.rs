@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use std::time::Duration;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, Interest};
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 
@@ -100,5 +100,54 @@ impl TcpClient {
 
     pub fn is_connected(&self) -> bool {
         self.stream.is_some()
+    }
+
+    /// Check if the TCP connection is still alive by testing the socket state.
+    /// Returns true if the connection is active, false if disconnected.
+    pub async fn check_connection(&mut self) -> bool {
+        let stream = match self.stream.as_mut() {
+            Some(s) => s,
+            None => return false,
+        };
+
+        // Try to poll the read readiness with a very short timeout
+        // This will detect if the connection has been closed by the peer
+        match timeout(Duration::from_millis(100), stream.ready(Interest::READABLE)).await {
+            Ok(Ok(_)) => {
+                // Stream is readable or has been closed
+                // Try a non-blocking read to check if EOF (connection closed)
+                let mut buf = [0u8; 1];
+                match stream.try_read(&mut buf) {
+                    Ok(0) => {
+                        // EOF - connection closed by peer
+                        self.stream = None;
+                        false
+                    }
+                    Ok(_) => {
+                        // Data available - connection is alive
+                        true
+                    }
+                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                        // No data available but connection is still alive
+                        true
+                    }
+                    Err(_) => {
+                        // Connection error
+                        self.stream = None;
+                        false
+                    }
+                }
+            }
+            Ok(Err(_)) => {
+                // Error polling readiness
+                self.stream = None;
+                false
+            }
+            Err(_) => {
+                // Timeout - assume connection is still alive
+                // (couldn't determine status within timeout)
+                true
+            }
+        }
     }
 }

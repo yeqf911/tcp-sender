@@ -79,7 +79,7 @@ pub async fn check_connection_status(
     connection_id: String,
 ) -> Result<bool, String> {
     manager
-        .is_connected(&connection_id)
+        .check_connection(&connection_id)
         .await
         .map_err(|e| e.to_string())
 }

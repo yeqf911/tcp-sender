@@ -232,28 +232,34 @@ export default function Messages() {
     syncConnectionStatus();
   }, []); // Only run on mount
 
-  // Periodically check connection status for current tab
+  // Periodically check connection status for all tabs
   useEffect(() => {
     const checkInterval = setInterval(async () => {
-      const connId = `conn_${activeTab}`;
-      try {
-        const isConnected = await connectionService.checkStatus(connId);
-        // Only update if status changed
-        const currentTab = tabs.find(tab => tab.key === activeTab);
-        if (currentTab && currentTab.isConnected !== isConnected) {
-          updateTab(activeTab, { isConnected });
-        }
-      } catch {
-        // If check fails, assume disconnected
-        const currentTab = tabs.find(tab => tab.key === activeTab);
-        if (currentTab && currentTab.isConnected) {
-          updateTab(activeTab, { isConnected: false });
+      // Check all tabs to detect any disconnection
+      for (const tab of tabs) {
+        const connId = `conn_${tab.key}`;
+        try {
+          const isConnected = await connectionService.checkStatus(connId);
+          // Only update if status changed
+          if (tab.isConnected !== isConnected) {
+            updateTab(tab.key, { isConnected });
+            // Show notification when connection is lost
+            if (tab.isConnected && !isConnected) {
+              antMessage.warning(`Server connection lost (Connection ${tab.key})`);
+            }
+          }
+        } catch {
+          // If check fails, assume disconnected
+          if (tab.isConnected) {
+            updateTab(tab.key, { isConnected: false });
+            antMessage.warning(`Server connection lost (Connection ${tab.key})`);
+          }
         }
       }
-    }, 2000); // Check every 2 seconds
+    }, 1000); // Check every 1 second
 
     return () => clearInterval(checkInterval);
-  }, [activeTab, tabs]);
+  }, [tabs]);
 
   // Save state to localStorage whenever tabs or activeTab changes
   useEffect(() => {

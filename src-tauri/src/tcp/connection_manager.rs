@@ -99,6 +99,19 @@ impl ConnectionManager {
         Ok(client.is_connected())
     }
 
+    /// Check if the connection is still alive by testing the actual socket state.
+    /// This performs a real connectivity check, unlike is_connected which just checks
+    /// if the stream object exists.
+    pub async fn check_connection(&self, id: &ConnectionId) -> Result<bool> {
+        let mut connections = self.connections.lock().await;
+
+        let client = connections
+            .get_mut(id)
+            .context(format!("Connection '{}' not found", id))?;
+
+        Ok(client.check_connection().await)
+    }
+
     pub async fn remove_connection(&self, id: &ConnectionId) -> Result<()> {
         let mut connections = self.connections.lock().await;
 
