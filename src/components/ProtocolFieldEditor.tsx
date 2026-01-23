@@ -70,27 +70,41 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
     setTimeout(() => scrollRowIntoView(newIndex), 0);
   }, [focusedRowIndex, scrollRowIntoView]);
 
-  // Handle container click to set focus
-  const handleContainerClick = useCallback(() => {
-    if (focusedRowIndex === null && fields.length > 0) {
-      setFocusedRowIndex(0);
-    }
-  }, [focusedRowIndex, fields.length]);
+  // Handle row click to set focus start point
+  const handleRowClick = useCallback((index: number) => {
+    setFocusedRowIndex(index);
+  }, []);
+
+  // Handle click outside to clear focus
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const container = listContainerRef.current;
+      if (!container) return;
+
+      // Check if click is outside the list container
+      if (!container.contains(e.target as Node)) {
+        setFocusedRowIndex(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const container = listContainerRef.current;
     if (!container) return;
 
     container.addEventListener('keydown', handleKeyDown);
-    container.addEventListener('click', handleContainerClick);
     // Make container focusable
     container.tabIndex = 0;
 
     return () => {
       container.removeEventListener('keydown', handleKeyDown);
-      container.removeEventListener('click', handleContainerClick);
     };
-  }, [handleKeyDown, handleContainerClick]);
+  }, [handleKeyDown]);
 
   // Format hex value with spaces between bytes
   const formatHexValue = (value: string, maxLength?: number): string => {
@@ -746,11 +760,25 @@ function ProtocolFieldEditor({ fields, onChange }: ProtocolFieldEditorProps) {
             onRow={(record, index) => ({
               style: {
                 opacity: record.enabled === false ? 0.4 : 1,
-                background: focusedRowIndex === index ? 'rgba(255, 108, 55, 0.15)' : undefined,
-                boxShadow: focusedRowIndex === index ? 'inset 2px 0 0 0 #ff6c37' : undefined,
+                background: focusedRowIndex === index ? '#3e3e42' : undefined,
+                boxShadow: focusedRowIndex === index ? 'inset 2px 0 0 0 #5a5a5e' : undefined,
+                cursor: 'pointer',
               },
               ref: (el: HTMLTableRowElement | null) => {
                 rowRefs.current[`row-${index}`] = el;
+              },
+              onClick: (e: React.MouseEvent) => {
+                // Prevent focus change when clicking on interactive elements
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'INPUT' ||
+                    target.tagName === 'BUTTON' ||
+                    target.tagName === 'SPAN' && target.parentElement?.tagName === 'BUTTON' ||
+                    target.closest('input') ||
+                    target.closest('button') ||
+                    target.closest('.ant-checkbox')) {
+                  return;
+                }
+                handleRowClick(index ?? 0);
               },
             })}
           />
